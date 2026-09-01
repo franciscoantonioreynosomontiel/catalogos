@@ -1,61 +1,56 @@
 /**
- * Wisbe Embeddable Web Component Widgets
- * Enables integration on external websites via custom tags:
- * <wisbe_landingPage business="slug"></wisbe_landingPage>
- * <wisbe_catalogo business="slug"></wisbe_catalogo>
+ * Wisbe Embeddable Widgets System (Custom Labels)
+ * Enables embedding via <wisbe_landingPage> and <wisbe_catalogo>
  */
 
-(function() {
-    const scripts = document.getElementsByTagName('script');
-    let basePath = '';
-    for (let script of scripts) {
-        if (script.src && script.src.includes('widget.js')) {
-            basePath = script.src.replace('widget.js', '');
-            break;
-        }
-    }
-    if (!basePath) basePath = './';
+(function () {
+    const BASE_URL = document.currentScript ? document.currentScript.src.replace('/widget.js', '') : '';
 
-    class WisbeLandingWidget extends HTMLElement {
+    class WisbeLandingPage extends HTMLElement {
         connectedCallback() {
-            const businessSlug = this.getAttribute('business') || 'solaris-power';
-            const width = this.getAttribute('width') || '100%';
-            const height = this.getAttribute('height') || '800px';
+            const clientId = this.getAttribute('client-id');
+            if (!clientId) {
+                this.innerHTML = '<p style="color:red;">Wisbe Widget Error: client-id is required</p>';
+                return;
+            }
 
             const iframe = document.createElement('iframe');
-            iframe.src = `${basePath}public_landing.html?biz=${businessSlug}`;
-            iframe.style.width = width;
-            iframe.style.height = height;
+            iframe.src = `${BASE_URL}/public_landing.html?id=${clientId}`;
+            iframe.style.width = '100%';
+            iframe.style.height = this.getAttribute('height') || '800px';
             iframe.style.border = 'none';
-            iframe.style.borderRadius = '12px';
-            iframe.style.overflow = 'hidden';
+            iframe.style.borderRadius = '8px';
 
+            this.innerHTML = '';
             this.appendChild(iframe);
         }
     }
 
-    class WisbeCatalogoWidget extends HTMLElement {
+    class WisbeCatalogo extends HTMLElement {
         connectedCallback() {
-            const businessSlug = this.getAttribute('business') || 'solaris-power';
-            const width = this.getAttribute('width') || '100%';
-            const height = this.getAttribute('height') || '800px';
+            const clientId = this.getAttribute('client-id');
+            if (!clientId) {
+                this.innerHTML = '<p style="color:red;">Wisbe Widget Error: client-id is required</p>';
+                return;
+            }
 
             const iframe = document.createElement('iframe');
-            iframe.src = `${basePath}public_catalog.html?biz=${businessSlug}`;
-            iframe.style.width = width;
-            iframe.style.height = height;
+            iframe.src = `${BASE_URL}/public_catalog.html?id=${clientId}`;
+            iframe.style.width = '100%';
+            iframe.style.height = this.getAttribute('height') || '700px';
             iframe.style.border = 'none';
-            iframe.style.borderRadius = '12px';
-            iframe.style.overflow = 'hidden';
+            iframe.style.borderRadius = '8px';
 
+            this.innerHTML = '';
             this.appendChild(iframe);
         }
     }
 
     if (!customElements.get('wisbe_landingpage')) {
-        customElements.define('wisbe_landingpage', WisbeLandingWidget);
+        customElements.define('wisbe_landingpage', WisbeLandingPage);
     }
+
     if (!customElements.get('wisbe_catalogo')) {
-        customElements.define('wisbe_catalogo', WisbeCatalogoWidget);
+        customElements.define('wisbe_catalogo', WisbeCatalogo);
     }
 })();

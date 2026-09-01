@@ -1,573 +1,420 @@
-// Main Application Logic & Admin Controller for Wisbe
+/**
+ * Wisbe App Logic & Multi-tenant Controller
+ */
 
 document.addEventListener('DOMContentLoaded', () => {
     initApp();
 });
 
 function initApp() {
-    setupAuthListeners();
-    checkAuthSession();
+    // 1. Session Check
+    const user = window.wisbeAuth.getCurrentUser();
+    const loginView = document.getElementById('view-login');
+    const appView = document.getElementById('view-app');
+
+    if (!user) {
+        if (loginView) loginView.style.display = 'flex';
+        if (appView) appView.style.display = 'none';
+        setupLoginForm();
+        return;
+    }
+
+    if (loginView) loginView.style.display = 'none';
+    if (appView) appView.style.display = 'flex';
+
+    // Update Header / Sidebar Auth Info
+    document.getElementById('sidebar-user-name').textContent = user.username;
+    document.getElementById('user-role-badge').textContent = user.role.toUpperCase();
+
+    // 2. Navigation Handling
     setupNavigation();
-    setupAdminHandlers();
-    setupBusinessInfoHandlers();
-    setupLandingEditorHandlers();
-    setupCatalogEditorHandlers();
+
+    // 3. Render Active Client
+    refreshActiveClientUI();
+
+    // 4. Setup Section Forms & Action Handlers
+    setupClientSection();
+    setupUsersSection();
+    setupCatalogSection();
+    setupLandingSection();
+    setupWidgetsSection();
+
+    // Setup Logout
+    document.getElementById('btn-logout').addEventListener('click', () => {
+        window.wisbeAuth.logout();
+    });
 }
 
-// --- AUTHENTICATION FLOW ---
-function setupAuthListeners() {
-    const loginForm = document.getElementById('login-form');
-    if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const username = document.getElementById('login-username').value;
-            const password = document.getElementById('login-password').value;
-            const errorElement = document.getElementById('login-error');
+function setupLoginForm() {
+    const form = document.getElementById('login-form');
+    if (!form) return;
 
-            const res = window.wisbeAuth.login(username, password);
-            if (res.success) {
-                errorElement.style.display = 'none';
-                checkAuthSession();
-            } else {
-                errorElement.textContent = res.error;
-                errorElement.style.display = 'block';
-            }
-        });
-    }
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const u = document.getElementById('login-username').value;
+        const p = document.getElementById('login-password').value;
 
-    const logoutBtn = document.getElementById('btn-logout');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-            window.wisbeAuth.logout();
-        });
-    }
-}
-
-function checkAuthSession() {
-    const loginScreen = document.getElementById('login-screen');
-    const appContainer = document.getElementById('app-container');
-    const roleBadge = document.getElementById('role-badge');
-    const userDisplayName = document.getElementById('user-display-name');
-    const userDisplayEmail = document.getElementById('user-display-email');
-    const adminNavSection = document.getElementById('admin-nav-section');
-
-    if (window.wisbeAuth.isAuthenticated()) {
-        loginScreen.style.display = 'none';
-        appContainer.style.display = 'flex';
-
-        const user = window.wisbeAuth.getCurrentUser();
-        userDisplayName.textContent = user.name;
-        userDisplayEmail.textContent = user.email;
-
-        if (window.wisbeAuth.isAdmin()) {
-            roleBadge.textContent = 'Admin';
-            adminNavSection.style.display = 'block';
-            switchView('admin-clients');
+        const res = window.wisbeAuth.login(u, p);
+        if (res.success) {
+            window.location.reload();
         } else {
-            roleBadge.textContent = 'Cliente';
-            adminNavSection.style.display = 'none';
-            switchView('catalog-editor');
+            const err = document.getElementById('login-error');
+            if (err) err.style.display = 'block';
         }
-
-        renderClientSidebarList();
-        updateActiveClientIndicator();
-    } else {
-        loginScreen.style.display = 'flex';
-        appContainer.style.display = 'none';
-    }
+    });
 }
 
-// --- NAVIGATION & VIEWS SWITCHER ---
 function setupNavigation() {
-    const navItems = document.querySelectorAll('.nav-item');
-    navItems.forEach(item => {
-        item.addEventListener('click', () => {
-            const viewName = item.getAttribute('data-view');
-            switchView(viewName);
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetNav = link.getAttribute('data-nav');
+            if (!targetNav) return;
+
+            navLinks.forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
+
+            // Hide all sections
+            document.querySelectorAll('.app-section').forEach(s => s.style.display = 'none');
+
+            // Show target section
+            const targetSec = document.getElementById(`section-${targetNav}`);
+            if (targetSec) targetSec.style.display = 'block';
+
+            // Update page title
+            const pageTitle = link.textContent.trim();
+            document.getElementById('current-page-title').textContent = pageTitle;
+
+            // Trigger specific section refreshes
+            if (targetNav === 'clientes') renderClientsTable();
+            if (targetNav === 'usuarios') renderUsersTable();
+            if (targetNav === 'catalogo') renderCatalogEditor();
+            if (targetNav === 'landing') renderLandingEditor();
+            if (targetNav === 'widgets') renderWidgetsInfo();
         });
     });
 }
 
-function switchView(viewName) {
-    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-    const targetNav = document.querySelector(`.nav-item[data-view="${viewName}"]`);
-    if (targetNav) targetNav.classList.add('active');
+function refreshActiveClientUI() {
+    const activeId = window.wisbeDB.getActiveBusinessId();
+    const activeBiz = window.wisbeDB.getBusinessById(activeId);
 
-    document.querySelectorAll('.app-view').forEach(view => view.style.display = 'none');
-    const targetView = document.getElementById(`view-${viewName}`);
-    if (targetView) targetView.style.display = 'block';
-
-    const topbarTitle = document.getElementById('topbar-title-text');
-    const sidebarClientBox = document.getElementById('sidebar-client-selector-box');
-
-    if (window.wisbeAuth.isAdmin() && (viewName === 'landing-editor' || viewName === 'catalog-editor' || viewName === 'business-info')) {
-        sidebarClientBox.style.display = 'block';
+    if (activeBiz) {
+        document.getElementById('sidebar-active-client-name').textContent = activeBiz.name;
+        document.getElementById('top-active-client-name').textContent = activeBiz.name;
+        document.getElementById('preview-client-label').textContent = activeBiz.name;
     } else {
-        sidebarClientBox.style.display = 'none';
-    }
-
-    switch (viewName) {
-        case 'admin-clients':
-            topbarTitle.textContent = 'Control General de Clientes';
-            renderClientsTable();
-            break;
-        case 'business-info':
-            topbarTitle.textContent = 'Información General del Negocio';
-            loadBusinessInfoForm();
-            break;
-        case 'catalog-editor':
-            topbarTitle.textContent = 'Diseño & Gestión del Catálogo de Productos';
-            loadCatalogEditor();
-            break;
-        case 'landing-editor':
-            topbarTitle.textContent = 'Diseño & Editor de Landing Page';
-            loadLandingPageEditor();
-            break;
-        case 'widget-code':
-            topbarTitle.textContent = 'Integración con Custom Tags (wisbe_landingPage & wisbe_catalogo)';
-            loadWidgetCodeSnippets();
-            break;
+        document.getElementById('sidebar-active-client-name').textContent = 'Ninguno';
+        document.getElementById('top-active-client-name').textContent = 'Ninguno';
     }
 }
 
-// --- ADMIN CLIENT MANAGEMENT ---
-function setupAdminHandlers() {
-    const btnNewClient = document.getElementById('btn-open-create-client');
-    const modalClient = document.getElementById('modal-client');
-    const btnCloseModal = document.getElementById('btn-close-client-modal');
-    const formClient = document.getElementById('form-client');
+/* ---------------- CLIENTS SECTION ---------------- */
+function setupClientSection() {
+    renderClientsTable();
 
-    if (btnNewClient) {
-        btnNewClient.addEventListener('click', () => {
-            document.getElementById('modal-client-title').textContent = 'Crear Nuevo Cliente';
-            formClient.reset();
-            document.getElementById('client-id').value = '';
-            modalClient.classList.add('open');
+    const btnNew = document.getElementById('btn-open-create-client');
+    const cardForm = document.getElementById('card-create-client');
+    const btnCancel = document.getElementById('btn-cancel-client');
+    const form = document.getElementById('form-create-client');
+
+    btnNew.addEventListener('click', () => { cardForm.style.display = 'block'; });
+    btnCancel.addEventListener('click', () => { cardForm.style.display = 'none'; form.reset(); });
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('client-input-name').value;
+        const category = document.getElementById('client-input-category').value;
+        const phone = document.getElementById('client-input-phone').value;
+        const email = document.getElementById('client-input-email').value;
+
+        window.wisbeDB.addBusiness({
+            name,
+            category,
+            whatsapp: phone,
+            email
         });
-    }
 
-    if (btnCloseModal) {
-        btnCloseModal.addEventListener('click', () => {
-            modalClient.classList.remove('open');
-        });
-    }
-
-    if (formClient) {
-        formClient.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const id = document.getElementById('client-id').value;
-            const name = document.getElementById('modal-biz-name').value;
-            const business_type = document.getElementById('modal-biz-type').value;
-            const whatsapp = document.getElementById('modal-biz-whatsapp').value;
-            const email = document.getElementById('modal-biz-email').value;
-
-            const newBiz = {
-                id: id || undefined,
-                name,
-                business_type,
-                whatsapp,
-                phone: whatsapp,
-                email,
-                owner_email: email,
-                slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-')
-            };
-
-            window.wisbeDB.saveBusiness(newBiz);
-            modalClient.classList.remove('open');
-            renderClientsTable();
-            renderClientSidebarList();
-        });
-    }
+        form.reset();
+        cardForm.style.display = 'none';
+        renderClientsTable();
+    });
 }
 
 function renderClientsTable() {
     const tbody = document.getElementById('clients-table-body');
-    if (!tbody) return;
-
     const businesses = window.wisbeDB.getBusinesses();
     const activeId = window.wisbeDB.getActiveBusinessId();
 
-    tbody.innerHTML = businesses.map(b => `
-        <tr style="${b.id === activeId ? 'background-color: #f1f5f9;' : ''}">
-            <td style="font-weight: 600;">${b.name}</td>
-            <td style="text-transform: capitalize; color: var(--text-muted);">${b.business_type || 'General'}</td>
-            <td>${b.whatsapp || '-'}</td>
-            <td>${b.owner_email || '-'}</td>
-            <td style="text-align: right;">
-                <div style="display: inline-flex; gap: 0.35rem;">
-                    <button class="btn btn-secondary btn-sm" onclick="openClientModule('${b.id}', 'catalog-editor')">Editar Catálogo</button>
-                    <button class="btn btn-secondary btn-sm" onclick="openClientModule('${b.id}', 'landing-editor')">Editar Landing</button>
-                    <button class="btn btn-primary btn-sm" onclick="openClientModule('${b.id}', 'business-info')">Info Negocio</button>
-                </div>
+    tbody.innerHTML = businesses.map(b => {
+        const isActive = b.id == activeId;
+        return `
+            <tr>
+                <td>#${b.id}</td>
+                <td><strong>${b.name}</strong></td>
+                <td>${b.category || 'General'}</td>
+                <td>${b.whatsapp || '-'}</td>
+                <td>${isActive ? '<span class="badge badge-admin">ACTIVO</span>' : '<span class="badge badge-client">Inactivo</span>'}</td>
+                <td style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-secondary btn-sm" onclick="selectActiveClient(${b.id})">Seleccionar</button>
+                    <button class="btn btn-primary btn-sm" onclick="editClientCatalog(${b.id})">Editar Catálogo</button>
+                    <button class="btn btn-primary btn-sm" onclick="editClientLanding(${b.id})">Editar Landing</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+window.selectActiveClient = function(id) {
+    window.wisbeDB.setActiveBusinessId(id);
+    refreshActiveClientUI();
+    renderClientsTable();
+};
+
+window.editClientCatalog = function(id) {
+    window.selectActiveClient(id);
+    document.querySelector('[data-nav="catalogo"]').click();
+};
+
+window.editClientLanding = function(id) {
+    window.selectActiveClient(id);
+    document.querySelector('[data-nav="landing"]').click();
+};
+
+/* ---------------- USERS SECTION ---------------- */
+function setupUsersSection() {
+    renderUsersTable();
+
+    const btnNew = document.getElementById('btn-open-create-user');
+    const cardForm = document.getElementById('card-create-user');
+    const btnCancel = document.getElementById('btn-cancel-user');
+    const form = document.getElementById('form-create-user');
+
+    btnNew.addEventListener('click', () => { cardForm.style.display = 'block'; });
+    btnCancel.addEventListener('click', () => { cardForm.style.display = 'none'; form.reset(); });
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('user-input-name').value;
+        const username = document.getElementById('user-input-username').value;
+        const role = document.getElementById('user-input-role').value;
+
+        window.wisbeAuth.addUser({ name, username, role, password: '123' });
+        form.reset();
+        cardForm.style.display = 'none';
+        renderUsersTable();
+    });
+}
+
+function renderUsersTable() {
+    const tbody = document.getElementById('users-table-body');
+    const users = window.wisbeAuth.getUsers();
+
+    tbody.innerHTML = users.map(u => `
+        <tr>
+            <td><strong>${u.username}</strong></td>
+            <td>${u.name || u.username}</td>
+            <td><span class="badge ${u.role === 'admin' ? 'badge-admin' : 'badge-client'}">${u.role.toUpperCase()}</span></td>
+            <td>${u.createdAt || '2025-01-01'}</td>
+            <td>
+                ${u.username !== 'Antonio' ? `<button class="btn btn-danger btn-sm" onclick="deleteUser('${u.username}')">Eliminar</button>` : '<span style="font-size:0.8rem; color:var(--text-muted)">SuperAdmin</span>'}
             </td>
         </tr>
     `).join('');
 }
 
-function renderClientSidebarList() {
-    const container = document.getElementById('sidebar-clients-list');
-    if (!container) return;
+window.deleteUser = function(username) {
+    window.wisbeAuth.deleteUser(username);
+    renderUsersTable();
+};
 
-    const businesses = window.wisbeDB.getBusinesses();
-    const activeId = window.wisbeDB.getActiveBusinessId();
+/* ---------------- CATALOG EDITOR SECTION ---------------- */
+function setupCatalogSection() {
+    const btnAdd = document.getElementById('btn-add-product');
+    const cardForm = document.getElementById('card-product-form');
+    const btnCancel = document.getElementById('btn-cancel-product');
+    const form = document.getElementById('form-save-product');
+    const btnSaveStyle = document.getElementById('btn-save-catalog-style');
 
-    container.innerHTML = businesses.map(b => `
-        <div class="nav-item ${b.id === activeId ? 'active' : ''}" style="font-size: 0.85rem; padding: 0.45rem 0.6rem; display: flex; justify-content: space-between;" onclick="selectClientAndStay('${b.id}')">
-            <span>${b.name}</span>
-            <span style="font-size: 0.7rem; color: var(--text-muted); text-transform: capitalize;">${b.business_type}</span>
-        </div>
-    `).join('');
-}
+    btnAdd.addEventListener('click', () => {
+        document.getElementById('product-form-title').textContent = 'Nuevo Producto';
+        form.reset();
+        document.getElementById('prod-id').value = '';
+        cardForm.style.display = 'block';
+    });
 
-function openClientModule(businessId, targetModule) {
-    window.wisbeDB.setActiveBusinessId(businessId);
-    updateActiveClientIndicator();
-    renderClientSidebarList();
-    switchView(targetModule);
-}
+    btnCancel.addEventListener('click', () => {
+        cardForm.style.display = 'none';
+        form.reset();
+    });
 
-function selectClientAndStay(businessId) {
-    window.wisbeDB.setActiveBusinessId(businessId);
-    updateActiveClientIndicator();
-    renderClientSidebarList();
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const activeId = window.wisbeDB.getActiveBusinessId();
+        const prodId = document.getElementById('prod-id').value;
+        const name = document.getElementById('prod-name').value;
+        const price = parseFloat(document.getElementById('prod-price').value);
+        const image_url = document.getElementById('prod-image').value;
+        const description = document.getElementById('prod-desc').value;
 
-    const activeNav = document.querySelector('.nav-item.active');
-    const viewName = activeNav ? activeNav.getAttribute('data-view') : 'catalog-editor';
-    switchView(viewName);
-}
+        if (prodId) {
+            window.wisbeDB.updateProduct({ id: parseInt(prodId), name, price, image_url, description });
+        } else {
+            window.wisbeDB.addProduct({ business_id: activeId, name, price, image_url, description });
+        }
 
-function updateActiveClientIndicator() {
-    const activeId = window.wisbeDB.getActiveBusinessId();
-    const activeBiz = window.wisbeDB.getBusinessById(activeId);
-    const label = document.getElementById('active-client-name');
-    if (label && activeBiz) {
-        label.textContent = activeBiz.name;
-    }
-}
+        form.reset();
+        cardForm.style.display = 'none';
+        renderCatalogEditor();
+    });
 
-// --- BUSINESS INFO MODULE ---
-function setupBusinessInfoHandlers() {
-    const form = document.getElementById('business-info-form');
-    if (form) {
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const activeId = window.wisbeDB.getActiveBusinessId();
-            const biz = window.wisbeDB.getBusinessById(activeId) || {};
+    btnSaveStyle.addEventListener('click', () => {
+        const activeId = window.wisbeDB.getActiveBusinessId();
+        const cols = parseInt(document.getElementById('cat-grid-cols').value);
+        const badge = document.getElementById('cat-badge-text').value;
+        const btnColor = document.getElementById('cat-btn-color').value;
 
-            const logoFile = document.getElementById('biz-logo-file').files[0];
-            let logoUrl = document.getElementById('biz-logo-url').value;
-            if (logoFile) {
-                logoUrl = await window.wisbeCloudinary.uploadImage(logoFile);
-            }
-
-            const updatedBiz = {
-                ...biz,
-                id: activeId,
-                name: document.getElementById('biz-name').value,
-                tagline: document.getElementById('biz-tagline').value,
-                phone: document.getElementById('biz-phone').value,
-                whatsapp: document.getElementById('biz-whatsapp').value,
-                email: document.getElementById('biz-email').value,
-                address: document.getElementById('biz-address').value,
-                business_type: document.getElementById('biz-type').value,
-                logo_url: logoUrl || biz.logo_url,
-                brand_primary: document.getElementById('biz-brand-primary').value,
-                brand_accent: document.getElementById('biz-brand-accent').value
-            };
-
-            window.wisbeDB.saveBusiness(updatedBiz);
-            updateActiveClientIndicator();
-            alert('Información del negocio guardada exitosamente.');
+        window.wisbeDB.updateCatalogConfig(activeId, {
+            columns: cols,
+            badge_text: badge,
+            button_color: btnColor
         });
-    }
+
+        reloadIframe('catalog-preview-iframe');
+    });
 }
 
-function loadBusinessInfoForm() {
-    const activeId = window.wisbeDB.getActiveBusinessId();
-    const biz = window.wisbeDB.getBusinessById(activeId);
-    if (!biz) return;
-
-    document.getElementById('biz-name').value = biz.name || '';
-    document.getElementById('biz-tagline').value = biz.tagline || '';
-    document.getElementById('biz-phone').value = biz.phone || '';
-    document.getElementById('biz-whatsapp').value = biz.whatsapp || '';
-    document.getElementById('biz-email').value = biz.email || '';
-    document.getElementById('biz-address').value = biz.address || '';
-    document.getElementById('biz-type').value = biz.business_type || 'general';
-    document.getElementById('biz-logo-url').value = biz.logo_url || '';
-    document.getElementById('biz-brand-primary').value = biz.brand_primary || '#0f172a';
-    document.getElementById('biz-brand-accent').value = biz.brand_accent || '#2563eb';
-}
-
-// --- LANDING PAGE EDITOR ---
-function setupLandingEditorHandlers() {
-    const form = document.getElementById('landing-editor-form');
-    if (form) {
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const activeId = window.wisbeDB.getActiveBusinessId();
-
-            const heroImgFile = document.getElementById('lp-hero-img-file').files[0];
-            let heroImgUrl = document.getElementById('lp-hero-img-url').value;
-            if (heroImgFile) {
-                heroImgUrl = await window.wisbeCloudinary.uploadImage(heroImgFile);
-            }
-
-            const featureCards = document.querySelectorAll('.feature-input-group');
-            const features = Array.from(featureCards).map(group => ({
-                title: group.querySelector('.feat-title').value,
-                description: group.querySelector('.feat-desc').value
-            }));
-
-            const landingConfig = {
-                hero_title: document.getElementById('lp-hero-title').value,
-                hero_subtitle: document.getElementById('lp-hero-subtitle').value,
-                hero_cta_text: document.getElementById('lp-hero-cta').value,
-                hero_image_url: heroImgUrl,
-                badge_tag: document.getElementById('lp-badge').value,
-                about_title: document.getElementById('lp-about-title').value,
-                about_description: document.getElementById('lp-about-desc').value,
-                cta_banner_title: document.getElementById('lp-cta-title').value,
-                cta_banner_subtitle: document.getElementById('lp-cta-subtitle').value,
-                features
-            };
-
-            window.wisbeDB.saveLandingConfig(activeId, landingConfig);
-            refreshLandingPreview();
-            alert('Landing Page guardada.');
-        });
-    }
-}
-
-function loadLandingPageEditor() {
-    const activeId = window.wisbeDB.getActiveBusinessId();
-    const config = window.wisbeDB.getLandingConfig(activeId);
-    const biz = window.wisbeDB.getBusinessById(activeId);
-
-    document.getElementById('lp-badge').value = config.badge_tag || '';
-    document.getElementById('lp-hero-title').value = config.hero_title || '';
-    document.getElementById('lp-hero-subtitle').value = config.hero_subtitle || '';
-    document.getElementById('lp-hero-cta').value = config.hero_cta_text || '';
-    document.getElementById('lp-hero-img-url').value = config.hero_image_url || '';
-    document.getElementById('lp-about-title').value = config.about_title || '';
-    document.getElementById('lp-about-desc').value = config.about_description || '';
-    document.getElementById('lp-cta-title').value = config.cta_banner_title || '';
-    document.getElementById('lp-cta-subtitle').value = config.cta_banner_subtitle || '';
-
-    const featuresContainer = document.getElementById('lp-features-container');
-    const features = config.features || [];
-
-    featuresContainer.innerHTML = features.map((f, i) => `
-        <div class="feature-input-group" style="background: #f8fafc; border: 1px solid var(--border-color); padding: 0.75rem; border-radius: var(--radius-sm); margin-bottom: 0.6rem;">
-            <div class="form-group" style="margin-bottom: 0.4rem;">
-                <label class="form-label">Punto Clave ${i + 1}</label>
-                <input type="text" class="form-control feat-title" value="${f.title}">
-            </div>
-            <div class="form-group" style="margin-bottom: 0;">
-                <input type="text" class="form-control feat-desc" value="${f.description}">
-            </div>
-        </div>
-    `).join('');
-
-    const btnPublic = document.getElementById('btn-open-public-landing');
-    if (btnPublic && biz) {
-        btnPublic.href = `public_landing.html?biz=${biz.slug}`;
-    }
-
-    const previewLabel = document.getElementById('preview-biz-name-label');
-    if (previewLabel && biz) previewLabel.textContent = biz.name;
-
-    refreshLandingPreview();
-}
-
-function refreshLandingPreview() {
-    const activeId = window.wisbeDB.getActiveBusinessId();
-    const biz = window.wisbeDB.getBusinessById(activeId);
-    const iframe = document.getElementById('landing-preview-iframe');
-    if (iframe && biz) {
-        iframe.src = `public_landing.html?biz=${biz.slug}&preview=1&t=${Date.now()}`;
-    }
-}
-
-// --- CATALOG EDITOR ---
-function setupCatalogEditorHandlers() {
-    const configForm = document.getElementById('catalog-config-form');
-    if (configForm) {
-        configForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const activeId = window.wisbeDB.getActiveBusinessId();
-
-            const catalogConfig = {
-                layout_style: document.getElementById('cat-layout-style').value,
-                columns: parseInt(document.getElementById('cat-columns').value, 10),
-                badge_text: document.getElementById('cat-badge-text').value,
-                button_color: document.getElementById('cat-btn-color').value,
-                show_prices: document.getElementById('cat-show-prices').checked,
-                show_search: document.getElementById('cat-show-search').checked
-            };
-
-            window.wisbeDB.saveCatalogConfig(activeId, catalogConfig);
-            refreshCatalogPreview();
-            alert('Estilos del catálogo actualizados.');
-        });
-    }
-
-    const btnAddProd = document.getElementById('btn-open-add-product');
-    const modalProd = document.getElementById('modal-product');
-    const btnCloseProd = document.getElementById('btn-close-product-modal');
-    const formProd = document.getElementById('form-product');
-
-    if (btnAddProd) {
-        btnAddProd.addEventListener('click', () => {
-            document.getElementById('modal-product-title').textContent = 'Agregar Producto al Catálogo';
-            formProd.reset();
-            document.getElementById('product-id').value = '';
-            modalProd.classList.add('open');
-        });
-    }
-
-    if (btnCloseProd) {
-        btnCloseProd.addEventListener('click', () => {
-            modalProd.classList.remove('open');
-        });
-    }
-
-    if (formProd) {
-        formProd.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const activeId = window.wisbeDB.getActiveBusinessId();
-            const id = document.getElementById('product-id').value;
-
-            const imgFile = document.getElementById('prod-img-file').files[0];
-            let imgUrl = document.getElementById('prod-img-url').value;
-            if (imgFile) {
-                imgUrl = await window.wisbeCloudinary.uploadImage(imgFile);
-            }
-
-            const productData = {
-                id: id || undefined,
-                business_id: activeId,
-                name: document.getElementById('prod-name').value,
-                price: parseFloat(document.getElementById('prod-price').value),
-                category: document.getElementById('prod-category').value || 'General',
-                description: document.getElementById('prod-desc').value,
-                image_url: imgUrl || "https://images.unsplash.com/photo-1560393464-5c69a73c5770?w=600&auto=format&fit=crop&q=80",
-                status: 'active'
-            };
-
-            window.wisbeDB.saveProduct(productData);
-            modalProd.classList.remove('open');
-            renderProductsList();
-            refreshCatalogPreview();
-        });
-    }
-}
-
-function loadCatalogEditor() {
-    const activeId = window.wisbeDB.getActiveBusinessId();
-    const config = window.wisbeDB.getCatalogConfig(activeId);
-    const biz = window.wisbeDB.getBusinessById(activeId);
-
-    document.getElementById('cat-layout-style').value = config.layout_style || 'grid';
-    document.getElementById('cat-columns').value = config.columns || 3;
-    document.getElementById('cat-badge-text').value = config.badge_text || 'Disponible';
-    document.getElementById('cat-btn-color').value = config.button_color || '#2563eb';
-    document.getElementById('cat-show-prices').checked = config.show_prices !== false;
-    document.getElementById('cat-show-search').checked = config.show_search !== false;
-
-    const btnPublic = document.getElementById('btn-open-public-catalog');
-    if (btnPublic && biz) {
-        btnPublic.href = `public_catalog.html?biz=${biz.slug}`;
-    }
-
-    const previewLabel = document.getElementById('preview-catalog-biz-label');
-    if (previewLabel && biz) previewLabel.textContent = biz.name;
-
-    renderProductsList();
-    refreshCatalogPreview();
-}
-
-function renderProductsList() {
-    const container = document.getElementById('products-list-container');
-    if (!container) return;
-
+function renderCatalogEditor() {
     const activeId = window.wisbeDB.getActiveBusinessId();
     const products = window.wisbeDB.getProducts(activeId);
+    const config = window.wisbeDB.getCatalogConfig(activeId);
 
+    // Fill Config Controls
+    document.getElementById('cat-grid-cols').value = config.columns || 3;
+    document.getElementById('cat-badge-text').value = config.badge_text || 'En Stock';
+    document.getElementById('cat-btn-color').value = config.button_color || '#25d366';
+
+    // Fill Products List
+    const list = document.getElementById('catalog-products-list');
     if (products.length === 0) {
-        container.innerHTML = `<p style="color: var(--text-muted); font-size: 0.85rem; padding: 0.5rem 0;">No hay productos en este catálogo.</p>`;
-        return;
-    }
-
-    container.innerHTML = products.map(p => `
-        <div style="display: flex; align-items: center; justify-content: space-between; background: #ffffff; padding: 0.6rem 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-            <div style="display: flex; align-items: center; gap: 0.6rem;">
-                <img src="${p.image_url}" style="width: 36px; height: 36px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border-color);">
-                <div>
-                    <div style="font-weight: 600; font-size: 0.85rem; color: var(--text-main);">${p.name}</div>
-                    <div style="color: var(--primary); font-weight: 600; font-size: 0.8rem;">$${p.price.toFixed(2)}</div>
+        list.innerHTML = '<p style="font-size:0.85rem; color:var(--text-muted)">No hay productos en este catálogo.</p>';
+    } else {
+        list.innerHTML = products.map(p => `
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <img src="${p.image_url}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
+                    <div>
+                        <div style="font-weight: 600; font-size: 0.85rem;">${p.name}</div>
+                        <div style="font-size: 0.75rem; color: var(--primary); font-weight: 600;">$${p.price.toFixed(2)}</div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 0.35rem;">
+                    <button class="btn btn-secondary btn-sm" onclick="editProduct(${p.id})">Editar</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id})">Eliminar</button>
                 </div>
             </div>
-            <div style="display: flex; gap: 0.3rem;">
-                <button class="btn btn-secondary btn-sm" style="padding: 0.2rem 0.4rem; font-size: 0.75rem;" onclick="editProduct('${p.id}')">Editar</button>
-                <button class="btn btn-danger btn-sm" style="padding: 0.2rem 0.4rem; font-size: 0.75rem;" onclick="deleteProduct('${p.id}')">Eliminar</button>
-            </div>
-        </div>
-    `).join('');
-}
-
-function editProduct(productId) {
-    const activeId = window.wisbeDB.getActiveBusinessId();
-    const products = window.wisbeDB.getProducts(activeId);
-    const prod = products.find(p => p.id === productId);
-    if (!prod) return;
-
-    document.getElementById('modal-product-title').textContent = 'Editar Producto';
-    document.getElementById('product-id').value = prod.id;
-    document.getElementById('prod-name').value = prod.name;
-    document.getElementById('prod-price').value = prod.price;
-    document.getElementById('prod-category').value = prod.category;
-    document.getElementById('prod-desc').value = prod.description || '';
-    document.getElementById('prod-img-url').value = prod.image_url || '';
-
-    document.getElementById('modal-product').classList.add('open');
-}
-
-function deleteProduct(productId) {
-    if (confirm('¿Deseas eliminar este producto del catálogo?')) {
-        window.wisbeDB.deleteProduct(productId);
-        renderProductsList();
-        refreshCatalogPreview();
+        `).join('');
     }
+
+    // Update Public Link
+    const activeBiz = window.wisbeDB.getBusinessById(activeId);
+    const publicBtn = document.getElementById('btn-open-public-catalog');
+    if (publicBtn && activeBiz) {
+        publicBtn.href = `public_catalog.html?biz=${activeBiz.slug}`;
+    }
+
+    reloadIframe('catalog-preview-iframe');
 }
 
-function refreshCatalogPreview() {
+window.editProduct = function(id) {
+    const p = window.wisbeDB.getProductById(id);
+    if (!p) return;
+
+    document.getElementById('product-form-title').textContent = 'Editar Producto';
+    document.getElementById('prod-id').value = p.id;
+    document.getElementById('prod-name').value = p.name;
+    document.getElementById('prod-price').value = p.price;
+    document.getElementById('prod-image').value = p.image_url;
+    document.getElementById('prod-desc').value = p.description || '';
+
+    document.getElementById('card-product-form').style.display = 'block';
+};
+
+window.deleteProduct = function(id) {
+    window.wisbeDB.deleteProduct(id);
+    renderCatalogEditor();
+};
+
+/* ---------------- LANDING EDITOR SECTION ---------------- */
+function setupLandingSection() {
+    const btnSave = document.getElementById('btn-save-landing-data');
+    btnSave.addEventListener('click', () => {
+        const activeId = window.wisbeDB.getActiveBusinessId();
+        const heroTitle = document.getElementById('land-hero-title').value;
+        const heroSubtitle = document.getElementById('land-hero-subtitle').value;
+        const heroBtn = document.getElementById('land-hero-btn').value;
+        const heroImg = document.getElementById('land-hero-img').value;
+        const waMsg = document.getElementById('land-whatsapp-msg').value;
+        const address = document.getElementById('land-address').value;
+
+        window.wisbeDB.updateLandingConfig(activeId, {
+            hero_title: heroTitle,
+            hero_subtitle: heroSubtitle,
+            hero_btn_text: heroBtn,
+            hero_image_url: heroImg,
+            whatsapp_msg: waMsg,
+            address: address
+        });
+
+        reloadIframe('landing-preview-iframe');
+    });
+}
+
+function renderLandingEditor() {
+    const activeId = window.wisbeDB.getActiveBusinessId();
+    const landing = window.wisbeDB.getLandingConfig(activeId);
+    const biz = window.wisbeDB.getBusinessById(activeId);
+
+    document.getElementById('land-hero-title').value = landing.hero_title || '';
+    document.getElementById('land-hero-subtitle').value = landing.hero_subtitle || '';
+    document.getElementById('land-hero-btn').value = landing.hero_btn_text || 'Contactar por WhatsApp';
+    document.getElementById('land-hero-img').value = landing.hero_image_url || '';
+    document.getElementById('land-whatsapp-msg').value = landing.whatsapp_msg || 'Hola, me interesa más información';
+    document.getElementById('land-address').value = landing.address || '';
+
+    const publicBtn = document.getElementById('btn-open-public-landing');
+    if (publicBtn && biz) {
+        publicBtn.href = `public_landing.html?biz=${biz.slug}`;
+    }
+
+    reloadIframe('landing-preview-iframe');
+}
+
+/* ---------------- WIDGETS SECTION ---------------- */
+function setupWidgetsSection() {
+    renderWidgetsInfo();
+}
+
+function renderWidgetsInfo() {
     const activeId = window.wisbeDB.getActiveBusinessId();
     const biz = window.wisbeDB.getBusinessById(activeId);
-    const iframe = document.getElementById('catalog-preview-iframe');
-    if (iframe && biz) {
-        iframe.src = `public_catalog.html?biz=${biz.slug}&preview=1&t=${Date.now()}`;
-    }
-}
 
-// --- WIDGET CODE SNIPPETS ---
-function loadWidgetCodeSnippets() {
-    const activeId = window.wisbeDB.getActiveBusinessId();
-    const biz = window.wisbeDB.getBusinessById(activeId);
     if (!biz) return;
 
-    const slugSpans = document.querySelectorAll('.code-slug');
-    slugSpans.forEach(span => span.textContent = biz.slug);
+    const catLink = `${window.location.origin}${window.location.pathname.replace('index.html', '')}public_catalog.html?biz=${biz.slug}`;
+    const landLink = `${window.location.origin}${window.location.pathname.replace('index.html', '')}public_landing.html?biz=${biz.slug}`;
+
+    document.getElementById('widget-catalog-link').value = catLink;
+    document.getElementById('widget-landing-link').value = landLink;
+
+    document.getElementById('code-widget-tag-landing').textContent = `<wisbe_landingPage client-id="${biz.id}"></wisbe_landingPage>`;
+    document.getElementById('code-widget-tag-catalog').textContent = `<wisbe_catalogo client-id="${biz.id}"></wisbe_catalogo>`;
 }
 
-function copyCode(elementId) {
-    const text = document.getElementById(elementId).innerText;
-    navigator.clipboard.writeText(text);
-    alert('Código copiado al portapapeles.');
+function reloadIframe(iframeId) {
+    const iframe = document.getElementById(iframeId);
+    if (iframe) {
+        iframe.src = iframe.src;
+    }
 }
-
-window.openClientModule = openClientModule;
-window.selectClientAndStay = selectClientAndStay;
-window.editProduct = editProduct;
-window.deleteProduct = deleteProduct;
-window.copyCode = copyCode;
