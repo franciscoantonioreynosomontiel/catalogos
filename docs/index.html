@@ -11,9 +11,9 @@
     <!-- LOGIN MODAL / VIEW -->
     <div id="login-screen" class="login-screen">
         <div class="login-card">
-            <div style="text-align: center; margin-bottom: 2rem;">
-                <h1 style="font-size: 1.8rem; margin-bottom: 0.25rem;">Wisbe</h1>
-                <p style="color: var(--text-muted); font-size: 0.88rem;">Ingresa a tu cuenta para administrar tu negocio</p>
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <h1 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 0.25rem;">Wisbe</h1>
+                <p style="color: var(--text-muted); font-size: 0.85rem;">Ingresa a tu cuenta para administrar tu negocio</p>
             </div>
 
             <form id="login-form">
@@ -25,7 +25,7 @@
                     <label class="form-label" for="login-password">Contraseña</label>
                     <input type="password" id="login-password" class="form-control" placeholder="12345" required>
                 </div>
-                <div id="login-error" style="color: var(--accent-red); font-size: 0.85rem; margin-bottom: 1rem; display: none;"></div>
+                <div id="login-error" style="color: var(--accent-red, #ef4444); font-size: 0.82rem; margin-bottom: 1rem; display: none;"></div>
                 <button type="submit" class="btn btn-primary" style="width: 100%;">Iniciar Sesión</button>
             </form>
         </div>
@@ -48,29 +48,29 @@
                 <div id="admin-nav-section" style="display: none;">
                     <div class="nav-section-title">Administración</div>
                     <div class="nav-item active" data-view="admin-clients">
-                        Clientes
+                        Clientes / Cuentas
                     </div>
                 </div>
 
                 <!-- Client / Portal Navigation -->
-                <div class="nav-section-title">Módulos</div>
+                <div class="nav-section-title">Módulos del Cliente</div>
                 <div class="nav-item" data-view="business-info">
                     Información del Negocio
                 </div>
-                <div class="nav-item" data-view="landing-editor">
-                    Landing Page
-                </div>
                 <div class="nav-item" data-view="catalog-editor">
                     Catálogo de Productos
+                </div>
+                <div class="nav-item" data-view="landing-editor">
+                    Landing Page
                 </div>
                 <div class="nav-item" data-view="widget-code">
                     Códigos / Widgets Embed
                 </div>
 
-                <!-- Admin Client Switcher List (Visible for Admin on Landing / Catalog views) -->
+                <!-- Admin Client Switcher Box -->
                 <div id="sidebar-client-selector-box" style="margin-top: 1.5rem; display: none;">
-                    <div class="nav-section-title">Seleccionar Cliente</div>
-                    <div id="sidebar-clients-list" class="sidebar-clients-list">
+                    <div class="nav-section-title">Cliente Seleccionado</div>
+                    <div id="sidebar-clients-list" style="display: flex; flex-direction: column; gap: 0.25rem; margin-top: 0.4rem;">
                         <!-- Dynamic list of clients -->
                     </div>
                 </div>
@@ -78,11 +78,11 @@
 
             <div class="sidebar-footer">
                 <div class="user-profile">
-                    <div class="user-info">
+                    <div>
                         <div id="user-display-name" class="user-name">Antonio</div>
                         <div id="user-display-email" class="user-role">antonio@wisbe.com</div>
                     </div>
-                    <button id="btn-logout" class="btn btn-secondary btn-sm" style="padding: 0.3rem 0.6rem;" title="Cerrar sesión">Salir</button>
+                    <button id="btn-logout" class="btn btn-secondary btn-sm" style="padding: 0.25rem 0.5rem;" title="Cerrar sesión">Salir</button>
                 </div>
             </div>
         </aside>
@@ -96,7 +96,7 @@
                 </div>
                 <div class="topbar-actions">
                     <div class="active-client-pill" id="active-client-indicator">
-                        Negocio Activo: <strong id="active-client-name">Solaris Power Solutions</strong>
+                        Cliente Activo: <strong id="active-client-name">Solaris Power Solutions</strong>
                     </div>
                 </div>
             </header>
@@ -108,21 +108,21 @@
                 <section id="view-admin-clients" class="app-view" style="display: none;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                         <div>
-                            <h2>Clientes Registrados</h2>
-                            <p style="color: var(--text-muted); font-size: 0.88rem;">Crea y gestiona cuentas de clientes para configurar sus landings y catálogos.</p>
+                            <h2>Control de Clientes</h2>
+                            <p style="color: var(--text-muted); font-size: 0.85rem;">Crea cuentas y accede directamente a editar el catálogo o landing page de cada cliente.</p>
                         </div>
-                        <button id="btn-open-create-client" class="btn btn-primary">Nuevo Cliente</button>
+                        <button id="btn-open-create-client" class="btn btn-primary">+ Nuevo Cliente</button>
                     </div>
 
-                    <div class="card">
+                    <div class="card" style="padding: 0; overflow: hidden;">
                         <table class="table">
                             <thead>
                                 <tr>
                                     <th>Negocio</th>
                                     <th>Giro / Tipo</th>
-                                    <th>Teléfono / WhatsApp</th>
+                                    <th>WhatsApp</th>
                                     <th>Email</th>
-                                    <th>Acciones</th>
+                                    <th style="text-align: right;">Acciones de Edición</th>
                                 </tr>
                             </thead>
                             <tbody id="clients-table-body">
@@ -135,8 +135,8 @@
                 <!-- 2. BUSINESS INFO EDITOR VIEW -->
                 <section id="view-business-info" class="app-view" style="display: none;">
                     <div style="margin-bottom: 1.5rem;">
-                        <h2>Información del Negocio</h2>
-                        <p style="color: var(--text-muted); font-size: 0.88rem;">Estos datos se vinculan automáticamente con tu Landing Page y Catálogo.</p>
+                        <h2>Información General del Negocio</h2>
+                        <p style="color: var(--text-muted); font-size: 0.85rem;">Estos datos alimentan automáticamente la Landing Page y el Catálogo.</p>
                     </div>
 
                     <form id="business-info-form" class="card">
@@ -146,7 +146,7 @@
                                 <input type="text" id="biz-name" class="form-control" required>
                             </div>
                             <div class="form-group">
-                                <label class="form-label" for="biz-tagline">Eslogan / Subtítulo Corto</label>
+                                <label class="form-label" for="biz-tagline">Eslogan o Frase Corta</label>
                                 <input type="text" id="biz-tagline" class="form-control">
                             </div>
                         </div>
@@ -157,7 +157,7 @@
                                 <input type="text" id="biz-phone" class="form-control">
                             </div>
                             <div class="form-group">
-                                <label class="form-label" for="biz-whatsapp">WhatsApp (número completo con clave de país)</label>
+                                <label class="form-label" for="biz-whatsapp">WhatsApp (número con clave de país)</label>
                                 <input type="text" id="biz-whatsapp" class="form-control" placeholder="528112345678" required>
                             </div>
                             <div class="form-group">
@@ -172,7 +172,7 @@
                                 <input type="text" id="biz-address" class="form-control">
                             </div>
                             <div class="form-group">
-                                <label class="form-label" for="biz-type">Tipo / Giro de Negocio</label>
+                                <label class="form-label" for="biz-type">Giro de Negocio</label>
                                 <select id="biz-type" class="form-control">
                                     <option value="solar">Energía Solar / Paneles Solares</option>
                                     <option value="hvac">Aire Acondicionado / Minisplits</option>
@@ -185,136 +185,55 @@
 
                         <div class="grid-2">
                             <div class="form-group">
-                                <label class="form-label" for="biz-logo-file">Logo del Negocio (Subir o URL)</label>
-                                <input type="file" id="biz-logo-file" class="form-control" accept="image/*" style="margin-bottom: 0.5rem;">
-                                <input type="text" id="biz-logo-url" class="form-control" placeholder="o pega una URL de imagen">
+                                <label class="form-label" for="biz-logo-file">Logo del Negocio</label>
+                                <input type="file" id="biz-logo-file" class="form-control" accept="image/*" style="margin-bottom: 0.4rem;">
+                                <input type="text" id="biz-logo-url" class="form-control" placeholder="o pega URL de la imagen">
                             </div>
                             <div class="grid-2">
                                 <div class="form-group">
                                     <label class="form-label" for="biz-brand-primary">Color Principal</label>
-                                    <input type="color" id="biz-brand-primary" class="form-control" style="height: 42px; padding: 2px;">
+                                    <input type="color" id="biz-brand-primary" class="form-control" style="height: 38px; padding: 2px;">
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label" for="biz-brand-accent">Color de Acento / Botones</label>
-                                    <input type="color" id="biz-brand-accent" class="form-control" style="height: 42px; padding: 2px;">
+                                    <label class="form-label" for="biz-brand-accent">Color Botones / Acento</label>
+                                    <input type="color" id="biz-brand-accent" class="form-control" style="height: 38px; padding: 2px;">
                                 </div>
                             </div>
                         </div>
 
                         <div style="margin-top: 1rem; text-align: right;">
-                            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                            <button type="submit" class="btn btn-primary">Guardar Información</button>
                         </div>
                     </form>
                 </section>
 
-                <!-- 3. LANDING PAGE EDITOR VIEW -->
-                <section id="view-landing-editor" class="app-view" style="display: none;">
-                    <div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <h2>Editor de Landing Page</h2>
-                            <p style="color: var(--text-muted); font-size: 0.88rem;">Personaliza la plantilla universal adaptada para cualquier negocio.</p>
-                        </div>
-                        <a id="btn-open-public-landing" href="#" target="_blank" class="btn btn-secondary btn-sm">Ver Página Pública ↗</a>
-                    </div>
-
-                    <div class="editor-split-layout">
-                        <!-- Controls Form -->
-                        <div class="card" style="max-height: 80vh; overflow-y: auto;">
-                            <form id="landing-editor-form">
-                                <h4 style="margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);">Encabezado (Hero)</h4>
-
-                                <div class="form-group">
-                                    <label class="form-label" for="lp-badge">Etiqueta Superior</label>
-                                    <input type="text" id="lp-badge" class="form-control">
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label" for="lp-hero-title">Título Principal</label>
-                                    <textarea id="lp-hero-title" class="form-control"></textarea>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label" for="lp-hero-subtitle">Subtítulo Descriptivo</label>
-                                    <textarea id="lp-hero-subtitle" class="form-control"></textarea>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label" for="lp-hero-cta">Texto Botón WhatsApp</label>
-                                    <input type="text" id="lp-hero-cta" class="form-control">
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label" for="lp-hero-img-file">Imagen Hero (Subir o URL)</label>
-                                    <input type="file" id="lp-hero-img-file" class="form-control" accept="image/*" style="margin-bottom: 0.5rem;">
-                                    <input type="text" id="lp-hero-img-url" class="form-control" placeholder="URL de la imagen">
-                                </div>
-
-                                <h4 style="margin: 1.5rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);">Beneficios / Puntos Clave</h4>
-                                <div id="lp-features-container">
-                                    <!-- Dynamic feature inputs -->
-                                </div>
-
-                                <h4 style="margin: 1.5rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);">Sección "Sobre Nosotros"</h4>
-                                <div class="form-group">
-                                    <label class="form-label" for="lp-about-title">Título de Sección</label>
-                                    <input type="text" id="lp-about-title" class="form-control">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label" for="lp-about-desc">Descripción de la Empresa</label>
-                                    <textarea id="lp-about-desc" class="form-control"></textarea>
-                                </div>
-
-                                <h4 style="margin: 1.5rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);">Llamado a la Acción Final (Banner)</h4>
-                                <div class="form-group">
-                                    <label class="form-label" for="lp-cta-title">Título del Banner</label>
-                                    <input type="text" id="lp-cta-title" class="form-control">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label" for="lp-cta-subtitle">Subtítulo del Banner</label>
-                                    <input type="text" id="lp-cta-subtitle" class="form-control">
-                                </div>
-
-                                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Guardar Landing</button>
-                            </form>
-                        </div>
-
-                        <!-- Live Interactive Preview -->
-                        <div class="preview-container">
-                            <div class="preview-toolbar">
-                                <span>Vista Previa en Tiempo Real</span>
-                                <span id="preview-biz-name-label">Solaris Power</span>
-                            </div>
-                            <iframe id="landing-preview-iframe" style="width: 100%; height: 700px; border: none;"></iframe>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 4. PRODUCT CATALOG EDITOR VIEW -->
+                <!-- 3. PRODUCT CATALOG EDITOR VIEW -->
                 <section id="view-catalog-editor" class="app-view" style="display: none;">
                     <div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
                         <div>
-                            <h2>Gestión del Catálogo de Productos</h2>
-                            <p style="color: var(--text-muted); font-size: 0.88rem;">Carga rápida de productos y personalización 100% interactiva de la interfaz.</p>
+                            <h2>Editor del Catálogo de Productos</h2>
+                            <p style="color: var(--text-muted); font-size: 0.85rem;">Carga tus productos y personaliza el formato de presentación.</p>
                         </div>
-                        <div>
+                        <div style="display: flex; gap: 0.5rem;">
                             <button id="btn-open-add-product" class="btn btn-primary btn-sm">+ Agregar Producto</button>
                             <a id="btn-open-public-catalog" href="#" target="_blank" class="btn btn-secondary btn-sm">Ver Catálogo Público ↗</a>
                         </div>
                     </div>
 
                     <div class="editor-split-layout">
-                        <!-- Customization Controls & Products List Tabs -->
-                        <div>
-                            <div class="card" style="margin-bottom: 1.5rem;">
-                                <h4 style="margin-bottom: 1rem;">Personalización de Interfaz</h4>
+                        <!-- Left Panel: Controls & Product List -->
+                        <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                            <!-- Layout & Customization -->
+                            <div class="card">
+                                <h4 style="margin-bottom: 1rem;">Estilo e Interfaz</h4>
                                 <form id="catalog-config-form">
                                     <div class="grid-2">
                                         <div class="form-group">
-                                            <label class="form-label" for="cat-layout-style">Estilo de Diseño</label>
+                                            <label class="form-label" for="cat-layout-style">Diseño</label>
                                             <select id="cat-layout-style" class="form-control">
-                                                <option value="grid">Retícula de Tarjetas</option>
+                                                <option value="grid">Retícula Elegante</option>
                                                 <option value="list">Lista Horizontal</option>
-                                                <option value="compact">Modo Compacto / Tabla</option>
+                                                <option value="compact">Tabla Ficha Técnica</option>
                                             </select>
                                         </div>
                                         <div class="form-group">
@@ -329,21 +248,21 @@
 
                                     <div class="grid-2">
                                         <div class="form-group">
-                                            <label class="form-label" for="cat-badge-text">Texto de Estado / Badge</label>
+                                            <label class="form-label" for="cat-badge-text">Texto Badge</label>
                                             <input type="text" id="cat-badge-text" class="form-control" placeholder="Disponible">
                                         </div>
                                         <div class="form-group">
-                                            <label class="form-label" for="cat-btn-color">Color de Botón WhatsApp</label>
-                                            <input type="color" id="cat-btn-color" class="form-control" style="height: 42px; padding: 2px;">
+                                            <label class="form-label" for="cat-btn-color">Color Botón WhatsApp</label>
+                                            <input type="color" id="cat-btn-color" class="form-control" style="height: 38px; padding: 2px;">
                                         </div>
                                     </div>
 
                                     <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
-                                        <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem;">
+                                        <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.82rem;">
                                             <input type="checkbox" id="cat-show-prices" checked> Mostrar Precios
                                         </label>
-                                        <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem;">
-                                            <input type="checkbox" id="cat-show-search" checked> Buscador Activo
+                                        <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.82rem;">
+                                            <input type="checkbox" id="cat-show-search" checked> Buscador
                                         </label>
                                     </div>
 
@@ -353,20 +272,102 @@
 
                             <!-- Products List -->
                             <div class="card">
-                                <h4 style="margin-bottom: 1rem;">Productos Cargados</h4>
-                                <div id="products-list-container" style="display: flex; flex-direction: column; gap: 0.75rem; max-height: 400px; overflow-y: auto;">
+                                <h4 style="margin-bottom: 0.75rem;">Productos en Catálogo</h4>
+                                <div id="products-list-container" style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 360px; overflow-y: auto;">
                                     <!-- Dynamic list of products -->
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Live Preview -->
+                        <!-- Right Panel: Live Preview -->
                         <div class="preview-container">
                             <div class="preview-toolbar">
                                 <span>Vista Previa del Catálogo</span>
                                 <span id="preview-catalog-biz-label">Solaris Power</span>
                             </div>
-                            <iframe id="catalog-preview-iframe" style="width: 100%; height: 700px; border: none;"></iframe>
+                            <iframe id="catalog-preview-iframe" style="width: 100%; height: 680px; border: none;"></iframe>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 4. LANDING PAGE EDITOR VIEW -->
+                <section id="view-landing-editor" class="app-view" style="display: none;">
+                    <div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h2>Editor de Landing Page</h2>
+                            <p style="color: var(--text-muted); font-size: 0.85rem;">Personaliza la landing page para el cliente activo.</p>
+                        </div>
+                        <a id="btn-open-public-landing" href="#" target="_blank" class="btn btn-secondary btn-sm">Ver Página Pública ↗</a>
+                    </div>
+
+                    <div class="editor-split-layout">
+                        <!-- Controls Form -->
+                        <div class="card" style="max-height: 750px; overflow-y: auto;">
+                            <form id="landing-editor-form">
+                                <h4 style="margin-bottom: 1rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border-color);">Hero Principal</h4>
+
+                                <div class="form-group">
+                                    <label class="form-label" for="lp-badge">Etiqueta Superior</label>
+                                    <input type="text" id="lp-badge" class="form-control">
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label" for="lp-hero-title">Título Principal</label>
+                                    <textarea id="lp-hero-title" class="form-control" rows="2"></textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label" for="lp-hero-subtitle">Subtítulo Descriptivo</label>
+                                    <textarea id="lp-hero-subtitle" class="form-control" rows="2"></textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label" for="lp-hero-cta">Texto Botón WhatsApp</label>
+                                    <input type="text" id="lp-hero-cta" class="form-control">
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label" for="lp-hero-img-file">Imagen Hero</label>
+                                    <input type="file" id="lp-hero-img-file" class="form-control" accept="image/*" style="margin-bottom: 0.4rem;">
+                                    <input type="text" id="lp-hero-img-url" class="form-control" placeholder="URL de la imagen">
+                                </div>
+
+                                <h4 style="margin: 1.25rem 0 0.75rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border-color);">Beneficios Clave</h4>
+                                <div id="lp-features-container">
+                                    <!-- Dynamic feature inputs -->
+                                </div>
+
+                                <h4 style="margin: 1.25rem 0 0.75rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border-color);">Sobre Nosotros</h4>
+                                <div class="form-group">
+                                    <label class="form-label" for="lp-about-title">Título Sección</label>
+                                    <input type="text" id="lp-about-title" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="lp-about-desc">Descripción</label>
+                                    <textarea id="lp-about-desc" class="form-control" rows="3"></textarea>
+                                </div>
+
+                                <h4 style="margin: 1.25rem 0 0.75rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border-color);">Llamado a la Acción Final</h4>
+                                <div class="form-group">
+                                    <label class="form-label" for="lp-cta-title">Título Banner</label>
+                                    <input type="text" id="lp-cta-title" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="lp-cta-subtitle">Subtítulo Banner</label>
+                                    <input type="text" id="lp-cta-subtitle" class="form-control">
+                                </div>
+
+                                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Guardar Cambios Landing</button>
+                            </form>
+                        </div>
+
+                        <!-- Live Interactive Preview -->
+                        <div class="preview-container">
+                            <div class="preview-toolbar">
+                                <span>Vista Previa Landing Page</span>
+                                <span id="preview-biz-name-label">Solaris Power</span>
+                            </div>
+                            <iframe id="landing-preview-iframe" style="width: 100%; height: 680px; border: none;"></iframe>
                         </div>
                     </div>
                 </section>
@@ -374,15 +375,15 @@
                 <!-- 5. WIDGET EMBED CODE GENERATOR VIEW -->
                 <section id="view-widget-code" class="app-view" style="display: none;">
                     <div style="margin-bottom: 1.5rem;">
-                        <h2>Integración de Widgets (`wisbe_landingPage` & `wisbe_catalogo`)</h2>
-                        <p style="color: var(--text-muted); font-size: 0.88rem;">Copia estos códigos para incrustar la Landing Page o el Catálogo en cualquier sitio web externo con solo poner una etiqueta personalizada.</p>
+                        <h2>Integración con Custom Tags (`wisbe_landingPage` & `wisbe_catalogo`)</h2>
+                        <p style="color: var(--text-muted); font-size: 0.85rem;">Copia estas etiquetas personalizadas para incrustar el catálogo o la landing page en la web del cliente.</p>
                     </div>
 
                     <div class="grid-2">
                         <!-- Landing Page Widget -->
                         <div class="card">
-                            <h3 style="margin-bottom: 0.75rem;">Widget Landing Page (`wisbe_landingPage`)</h3>
-                            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">Pega esta etiqueta personalizada HTML en el sitio del cliente para renderizar la Landing Page completa de forma automática.</p>
+                            <h3 style="margin-bottom: 0.5rem; font-size: 1rem;">Widget Landing Page (`wisbe_landingPage`)</h3>
+                            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1rem;">Etiqueta HTML personalizada:</p>
 
                             <div class="code-box" id="code-snippet-landing">
 &lt;wisbe_landingPage business="<span class="code-slug">solaris-power</span>"&gt;&lt;/wisbe_landingPage&gt;
@@ -393,8 +394,8 @@
 
                         <!-- Catalog Widget -->
                         <div class="card">
-                            <h3 style="margin-bottom: 0.75rem;">Widget Catálogo (`wisbe_catalogo`)</h3>
-                            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">Pega esta etiqueta personalizada HTML para integrar el catálogo 100% customizable en cualquier web.</p>
+                            <h3 style="margin-bottom: 0.5rem; font-size: 1rem;">Widget Catálogo (`wisbe_catalogo`)</h3>
+                            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1rem;">Etiqueta HTML personalizada:</p>
 
                             <div class="code-box" id="code-snippet-catalog">
 &lt;wisbe_catalogo business="<span class="code-slug">solaris-power</span>"&gt;&lt;/wisbe_catalogo&gt;
@@ -424,7 +425,7 @@
                     <select id="modal-biz-type" class="form-control">
                         <option value="solar">Energía Solar</option>
                         <option value="hvac">HVAC / Minisplits</option>
-                        <option value="paint">Pintura y Ferretería</option>
+                        <option value="paint">Pintura y Recubrimientos</option>
                         <option value="hardware">Ferretería</option>
                         <option value="general">General</option>
                     </select>
@@ -469,11 +470,11 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="prod-desc">Descripción</label>
-                    <textarea id="prod-desc" class="form-control"></textarea>
+                    <textarea id="prod-desc" class="form-control" rows="3"></textarea>
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="prod-img-file">Imagen (Subir archivo o pegar URL)</label>
-                    <input type="file" id="prod-img-file" class="form-control" accept="image/*" style="margin-bottom: 0.5rem;">
+                    <input type="file" id="prod-img-file" class="form-control" accept="image/*" style="margin-bottom: 0.4rem;">
                     <input type="text" id="prod-img-url" class="form-control" placeholder="https://...">
                 </div>
                 <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
