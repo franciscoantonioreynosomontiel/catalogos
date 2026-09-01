@@ -1,12 +1,11 @@
 /**
  * Wisbe Embeddable Web Component Widgets
  * Enables integration on external websites via custom tags:
- * <wisbe_landingpage business="slug"></wisbe_landingpage>
+ * <wisbe_landingPage business="slug"></wisbe_landingPage>
  * <wisbe_catalogo business="slug"></wisbe_catalogo>
  */
 
 (function() {
-    // Determine current script base path
     const scripts = document.getElementsByTagName('script');
     let basePath = '';
     for (let script of scripts) {
@@ -17,7 +16,6 @@
     }
     if (!basePath) basePath = './';
 
-    // Widget: wisbe_landingpage
     class WisbeLandingWidget extends HTMLElement {
         connectedCallback() {
             const businessSlug = this.getAttribute('business') || 'solaris-power';
@@ -36,7 +34,6 @@
         }
     }
 
-    // Widget: wisbe_catalogo
     class WisbeCatalogoWidget extends HTMLElement {
         connectedCallback() {
             const businessSlug = this.getAttribute('business') || 'solaris-power';
@@ -55,17 +52,10 @@
         }
     }
 
-    // Register Custom Elements (support both wisbe_landingpage and wisbe-landingpage syntax)
     if (!customElements.get('wisbe_landingpage')) {
         customElements.define('wisbe_landingpage', WisbeLandingWidget);
     }
     if (!customElements.get('wisbe_catalogo')) {
         customElements.define('wisbe_catalogo', WisbeCatalogoWidget);
-    }
-    if (!customElements.get('wisbe-landingpage')) {
-        customElements.define('wisbe-landingpage', class extends WisbeLandingWidget {});
-    }
-    if (!customElements.get('wisbe-catalogo')) {
-        customElements.define('wisbe-catalogo', class extends WisbeCatalogoWidget {});
     }
 })();

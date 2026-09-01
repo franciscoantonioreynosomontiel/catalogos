@@ -1,9 +1,0 @@
-127.0.0.1 - - [01/Sep/2026 19:41:47] "GET /index.html HTTP/1.1" 200 -
-127.0.0.1 - - [01/Sep/2026 19:41:48] "GET /styles.css HTTP/1.1" 200 -
-127.0.0.1 - - [01/Sep/2026 19:41:48] "GET /config.js HTTP/1.1" 200 -
-127.0.0.1 - - [01/Sep/2026 19:41:48] "GET /db.js HTTP/1.1" 200 -
-127.0.0.1 - - [01/Sep/2026 19:41:48] "GET /app.js HTTP/1.1" 200 -
-127.0.0.1 - - [01/Sep/2026 19:41:48] "GET /auth.js HTTP/1.1" 200 -
-127.0.0.1 - - [01/Sep/2026 19:41:48] "GET /cloudinary.js HTTP/1.1" 200 -
-127.0.0.1 - - [01/Sep/2026 19:41:49] "GET /public_landing.html?biz=solaris-power&preview=1&t=1788291709431 HTTP/1.1" 200 -
-127.0.0.1 - - [01/Sep/2026 19:41:50] "GET /public_catalog.html?biz=solaris-power&preview=1&t=1788291710794 HTTP/1.1" 200 -

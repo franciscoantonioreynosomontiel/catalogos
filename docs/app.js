@@ -1,4 +1,4 @@
-// Main Application Logic & Admin Controller
+// Main Application Logic & Admin Controller for Wisbe
 
 document.addEventListener('DOMContentLoaded', () => {
     initApp();
@@ -66,7 +66,7 @@ function checkAuthSession() {
         } else {
             roleBadge.textContent = 'Cliente';
             adminNavSection.style.display = 'none';
-            switchView('business-info');
+            switchView('catalog-editor');
         }
 
         renderClientSidebarList();
@@ -89,21 +89,17 @@ function setupNavigation() {
 }
 
 function switchView(viewName) {
-    // Update active state in sidebar
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     const targetNav = document.querySelector(`.nav-item[data-view="${viewName}"]`);
     if (targetNav) targetNav.classList.add('active');
 
-    // Hide all views, show target view
     document.querySelectorAll('.app-view').forEach(view => view.style.display = 'none');
     const targetView = document.getElementById(`view-${viewName}`);
     if (targetView) targetView.style.display = 'block';
 
-    // Update Topbar Title
     const topbarTitle = document.getElementById('topbar-title-text');
     const sidebarClientBox = document.getElementById('sidebar-client-selector-box');
 
-    // Show client selector sidebar box for Admin on Landing or Catalog view
     if (window.wisbeAuth.isAdmin() && (viewName === 'landing-editor' || viewName === 'catalog-editor' || viewName === 'business-info')) {
         sidebarClientBox.style.display = 'block';
     } else {
@@ -112,23 +108,23 @@ function switchView(viewName) {
 
     switch (viewName) {
         case 'admin-clients':
-            topbarTitle.textContent = 'Gestión de Clientes Registrados';
+            topbarTitle.textContent = 'Control General de Clientes';
             renderClientsTable();
             break;
         case 'business-info':
             topbarTitle.textContent = 'Información General del Negocio';
             loadBusinessInfoForm();
             break;
-        case 'landing-editor':
-            topbarTitle.textContent = 'Editor de Landing Page Universal';
-            loadLandingPageEditor();
-            break;
         case 'catalog-editor':
-            topbarTitle.textContent = 'Gestor de Catálogo de Productos';
+            topbarTitle.textContent = 'Diseño & Gestión del Catálogo de Productos';
             loadCatalogEditor();
             break;
+        case 'landing-editor':
+            topbarTitle.textContent = 'Diseño & Editor de Landing Page';
+            loadLandingPageEditor();
+            break;
         case 'widget-code':
-            topbarTitle.textContent = 'Integración de Widgets (wisbe_landingPage & wisbe_catalogo)';
+            topbarTitle.textContent = 'Integración con Custom Tags (wisbe_landingPage & wisbe_catalogo)';
             loadWidgetCodeSnippets();
             break;
     }
@@ -192,15 +188,17 @@ function renderClientsTable() {
     const activeId = window.wisbeDB.getActiveBusinessId();
 
     tbody.innerHTML = businesses.map(b => `
-        <tr style="${b.id === activeId ? 'background: rgba(59, 130, 246, 0.08);' : ''}">
+        <tr style="${b.id === activeId ? 'background-color: #f1f5f9;' : ''}">
             <td style="font-weight: 600;">${b.name}</td>
-            <td><span class="client-badge-type">${b.business_type || 'General'}</span></td>
+            <td style="text-transform: capitalize; color: var(--text-muted);">${b.business_type || 'General'}</td>
             <td>${b.whatsapp || '-'}</td>
             <td>${b.owner_email || '-'}</td>
-            <td>
-                <button class="btn btn-secondary btn-sm" onclick="selectAndManageClient('${b.id}')">
-                    ${b.id === activeId ? 'Administrando' : 'Gestionar Portal'}
-                </button>
+            <td style="text-align: right;">
+                <div style="display: inline-flex; gap: 0.35rem;">
+                    <button class="btn btn-secondary btn-sm" onclick="openClientModule('${b.id}', 'catalog-editor')">Editar Catálogo</button>
+                    <button class="btn btn-secondary btn-sm" onclick="openClientModule('${b.id}', 'landing-editor')">Editar Landing</button>
+                    <button class="btn btn-primary btn-sm" onclick="openClientModule('${b.id}', 'business-info')">Info Negocio</button>
+                </div>
             </td>
         </tr>
     `).join('');
@@ -214,22 +212,27 @@ function renderClientSidebarList() {
     const activeId = window.wisbeDB.getActiveBusinessId();
 
     container.innerHTML = businesses.map(b => `
-        <div class="client-item ${b.id === activeId ? 'selected' : ''}" onclick="selectAndManageClient('${b.id}')">
+        <div class="nav-item ${b.id === activeId ? 'active' : ''}" style="font-size: 0.85rem; padding: 0.45rem 0.6rem; display: flex; justify-content: space-between;" onclick="selectClientAndStay('${b.id}')">
             <span>${b.name}</span>
-            <span class="client-badge-type">${b.business_type}</span>
+            <span style="font-size: 0.7rem; color: var(--text-muted); text-transform: capitalize;">${b.business_type}</span>
         </div>
     `).join('');
 }
 
-function selectAndManageClient(businessId) {
+function openClientModule(businessId, targetModule) {
     window.wisbeDB.setActiveBusinessId(businessId);
     updateActiveClientIndicator();
-    renderClientsTable();
+    renderClientSidebarList();
+    switchView(targetModule);
+}
+
+function selectClientAndStay(businessId) {
+    window.wisbeDB.setActiveBusinessId(businessId);
+    updateActiveClientIndicator();
     renderClientSidebarList();
 
-    // Reload active view with selected client's data
     const activeNav = document.querySelector('.nav-item.active');
-    const viewName = activeNav ? activeNav.getAttribute('data-view') : 'business-info';
+    const viewName = activeNav ? activeNav.getAttribute('data-view') : 'catalog-editor';
     switchView(viewName);
 }
 
@@ -274,7 +277,7 @@ function setupBusinessInfoHandlers() {
 
             window.wisbeDB.saveBusiness(updatedBiz);
             updateActiveClientIndicator();
-            alert('Información del negocio actualizada exitosamente');
+            alert('Información del negocio guardada exitosamente.');
         });
     }
 }
@@ -310,7 +313,6 @@ function setupLandingEditorHandlers() {
                 heroImgUrl = await window.wisbeCloudinary.uploadImage(heroImgFile);
             }
 
-            // Extract features
             const featureCards = document.querySelectorAll('.feature-input-group');
             const features = Array.from(featureCards).map(group => ({
                 title: group.querySelector('.feat-title').value,
@@ -332,7 +334,7 @@ function setupLandingEditorHandlers() {
 
             window.wisbeDB.saveLandingConfig(activeId, landingConfig);
             refreshLandingPreview();
-            alert('Landing Page guardada y actualizada.');
+            alert('Landing Page guardada.');
         });
     }
 }
@@ -352,14 +354,13 @@ function loadLandingPageEditor() {
     document.getElementById('lp-cta-title').value = config.cta_banner_title || '';
     document.getElementById('lp-cta-subtitle').value = config.cta_banner_subtitle || '';
 
-    // Render Features Inputs
     const featuresContainer = document.getElementById('lp-features-container');
     const features = config.features || [];
 
     featuresContainer.innerHTML = features.map((f, i) => `
-        <div class="feature-input-group" style="background: var(--bg-input); padding: 0.75rem; border-radius: var(--radius-sm); margin-bottom: 0.75rem;">
-            <div class="form-group" style="margin-bottom: 0.5rem;">
-                <label class="form-label">Beneficio ${i + 1}</label>
+        <div class="feature-input-group" style="background: #f8fafc; border: 1px solid var(--border-color); padding: 0.75rem; border-radius: var(--radius-sm); margin-bottom: 0.6rem;">
+            <div class="form-group" style="margin-bottom: 0.4rem;">
+                <label class="form-label">Punto Clave ${i + 1}</label>
                 <input type="text" class="form-control feat-title" value="${f.title}">
             </div>
             <div class="form-group" style="margin-bottom: 0;">
@@ -368,7 +369,6 @@ function loadLandingPageEditor() {
         </div>
     `).join('');
 
-    // Update public button link
     const btnPublic = document.getElementById('btn-open-public-landing');
     if (btnPublic && biz) {
         btnPublic.href = `public_landing.html?biz=${biz.slug}`;
@@ -412,7 +412,6 @@ function setupCatalogEditorHandlers() {
         });
     }
 
-    // Modal Add Product
     const btnAddProd = document.getElementById('btn-open-add-product');
     const modalProd = document.getElementById('modal-product');
     const btnCloseProd = document.getElementById('btn-close-product-modal');
@@ -420,7 +419,7 @@ function setupCatalogEditorHandlers() {
 
     if (btnAddProd) {
         btnAddProd.addEventListener('click', () => {
-            document.getElementById('modal-product-title').textContent = 'Agregar Nuevo Producto';
+            document.getElementById('modal-product-title').textContent = 'Agregar Producto al Catálogo';
             formProd.reset();
             document.getElementById('product-id').value = '';
             modalProd.classList.add('open');
@@ -496,22 +495,22 @@ function renderProductsList() {
     const products = window.wisbeDB.getProducts(activeId);
 
     if (products.length === 0) {
-        container.innerHTML = `<p style="color: var(--text-muted); font-size: 0.85rem;">No hay productos registrados para este negocio.</p>`;
+        container.innerHTML = `<p style="color: var(--text-muted); font-size: 0.85rem; padding: 0.5rem 0;">No hay productos en este catálogo.</p>`;
         return;
     }
 
     container.innerHTML = products.map(p => `
-        <div style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-input); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <img src="${p.image_url}" style="width: 44px; height: 44px; object-fit: cover; border-radius: 4px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; background: #ffffff; padding: 0.6rem 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+                <img src="${p.image_url}" style="width: 36px; height: 36px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border-color);">
                 <div>
-                    <div style="font-weight: 600; font-size: 0.88rem;">${p.name}</div>
-                    <div style="color: var(--primary); font-weight: 600; font-size: 0.82rem;">$${p.price.toFixed(2)}</div>
+                    <div style="font-weight: 600; font-size: 0.85rem; color: var(--text-main);">${p.name}</div>
+                    <div style="color: var(--primary); font-weight: 600; font-size: 0.8rem;">$${p.price.toFixed(2)}</div>
                 </div>
             </div>
-            <div style="display: flex; gap: 0.4rem;">
-                <button class="btn btn-secondary btn-sm" onclick="editProduct('${p.id}')">Editar</button>
-                <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.id}')">Borrar</button>
+            <div style="display: flex; gap: 0.3rem;">
+                <button class="btn btn-secondary btn-sm" style="padding: 0.2rem 0.4rem; font-size: 0.75rem;" onclick="editProduct('${p.id}')">Editar</button>
+                <button class="btn btn-danger btn-sm" style="padding: 0.2rem 0.4rem; font-size: 0.75rem;" onclick="deleteProduct('${p.id}')">Eliminar</button>
             </div>
         </div>
     `).join('');
@@ -567,7 +566,8 @@ function copyCode(elementId) {
     alert('Código copiado al portapapeles.');
 }
 
-window.selectAndManageClient = selectAndManageClient;
+window.openClientModule = openClientModule;
+window.selectClientAndStay = selectClientAndStay;
 window.editProduct = editProduct;
 window.deleteProduct = deleteProduct;
 window.copyCode = copyCode;

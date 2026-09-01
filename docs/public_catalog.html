@@ -4,23 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catálogo de Productos</title>
-    <link rel="stylesheet" href="styles.css">
     <style>
-        body {
-            background-color: var(--bg-body, #0f172a);
-            color: #ffffff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            padding: 1.5rem;
-            margin: 0;
+        :root {
+            --bg-page: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --primary-color: #2563eb;
+            --btn-color: #2563eb;
         }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            padding: 2rem 1.5rem;
+            line-height: 1.5;
+        }
+
+        .catalog-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* Header */
         .catalog-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
+            background: var(--bg-card);
+            padding: 1.25rem 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
             margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
         .biz-brand {
@@ -30,59 +54,74 @@
         }
 
         .biz-logo {
-            width: 48px;
-            height: 48px;
+            width: 44px;
+            height: 44px;
             border-radius: 8px;
             object-fit: cover;
+            border: 1px solid var(--border-color);
         }
 
-        .search-bar {
+        .biz-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .biz-tagline {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Search input */
+        .search-box {
             width: 100%;
             padding: 0.75rem 1rem;
-            background: #1e293b;
-            border: 1px solid #334155;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
-            color: #fff;
+            font-size: 0.9rem;
+            color: var(--text-main);
             margin-bottom: 1.5rem;
+            outline: none;
+            transition: border-color 0.15s ease;
         }
 
-        /* Layout styles */
-        .catalog-grid {
+        .search-box:focus {
+            border-color: var(--primary-color);
+        }
+
+        /* Layout Styles */
+        .products-grid {
             display: grid;
             gap: 1.25rem;
         }
 
-        .catalog-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
-        .catalog-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
-        .catalog-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+        .products-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+        .products-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+        .products-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
 
-        .catalog-grid.layout-list {
-            grid-template-columns: 1fr !important;
-        }
-
-        .catalog-grid.layout-compact {
-            grid-template-columns: 1fr !important;
-        }
-
+        /* Card Design */
         .product-card {
-            background: #1e293b;
-            border: 1px solid #334155;
-            border-radius: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
         }
 
         .product-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.08);
         }
 
         .product-card-img {
             width: 100%;
             height: 180px;
             object-fit: cover;
+            background-color: #f1f5f9;
         }
 
         .product-card-body {
@@ -98,22 +137,22 @@
             font-weight: 600;
             padding: 2px 8px;
             border-radius: 4px;
-            background: rgba(59, 130, 246, 0.2);
-            color: #60a5fa;
+            background: #eff6ff;
+            color: #2563eb;
             margin-bottom: 0.5rem;
             align-self: flex-start;
         }
 
         .product-title {
-            font-size: 1rem;
+            font-size: 0.98rem;
             font-weight: 600;
-            margin-bottom: 0.4rem;
-            color: #f8fafc;
+            color: var(--text-main);
+            margin-bottom: 0.35rem;
         }
 
         .product-desc {
             font-size: 0.82rem;
-            color: #94a3b8;
+            color: var(--text-muted);
             margin-bottom: 1rem;
             flex: 1;
             line-height: 1.4;
@@ -123,58 +162,67 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-top: auto;
             padding-top: 0.75rem;
-            border-top: 1px solid #334155;
+            border-top: 1px solid var(--border-color);
+            margin-top: auto;
         }
 
         .product-price {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: 700;
-            color: #38bdf8;
+            color: var(--text-main);
         }
 
-        .btn-order-wa {
-            background: #2563eb;
-            color: #fff;
-            border: none;
+        .btn-wa-order {
+            background-color: var(--btn-color);
+            color: #ffffff;
             padding: 0.45rem 0.9rem;
             border-radius: 6px;
             font-size: 0.82rem;
             font-weight: 600;
-            cursor: pointer;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 0.4rem;
+            gap: 0.35rem;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.15s ease;
         }
 
-        .btn-order-wa:hover {
+        .btn-wa-order:hover {
             opacity: 0.9;
         }
 
-        /* List Layout Specifics */
+        /* List Layout Option */
+        .layout-list .products-grid {
+            grid-template-columns: 1fr !important;
+        }
+
         .layout-list .product-card {
             flex-direction: row;
             align-items: center;
         }
 
         .layout-list .product-card-img {
-            width: 160px;
-            height: 100%;
-            min-height: 140px;
+            width: 180px;
+            height: 140px;
         }
 
-        /* Compact Layout Specifics */
+        /* Compact Layout Option */
+        .layout-compact .products-grid {
+            grid-template-columns: 1fr !important;
+            gap: 0.5rem;
+        }
+
         .layout-compact .product-card {
             flex-direction: row;
-            align-items: center;
             padding: 0.75rem 1rem;
+            align-items: center;
         }
 
         .layout-compact .product-card-img {
-            width: 50px;
-            height: 50px;
+            width: 48px;
+            height: 48px;
             border-radius: 6px;
             margin-right: 1rem;
         }
@@ -190,31 +238,46 @@
         .layout-compact .product-desc {
             display: none;
         }
+
+        @media (max-width: 640px) {
+            .products-grid {
+                grid-template-columns: 1fr !important;
+            }
+            .layout-list .product-card {
+                flex-direction: column;
+            }
+            .layout-list .product-card-img {
+                width: 100%;
+                height: 180px;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <div id="catalog-container">
+    <div class="catalog-container" id="catalog-main-wrapper">
         <!-- Header -->
         <header class="catalog-header">
             <div class="biz-brand">
                 <img id="cat-biz-logo" src="" class="biz-logo" style="display: none;">
                 <div>
-                    <h2 id="cat-biz-name" style="margin: 0; font-size: 1.25rem;">Cargando...</h2>
-                    <p id="cat-biz-tagline" style="margin: 0; font-size: 0.82rem; color: #94a3b8;"></p>
+                    <h1 id="cat-biz-name" class="biz-title">Cargando Catálogo...</h1>
+                    <p id="cat-biz-tagline" class="biz-tagline"></p>
                 </div>
             </div>
             <div>
-                <a id="btn-header-wa" href="#" target="_blank" class="btn-order-wa">Contactar WhatsApp</a>
+                <a id="btn-header-wa" href="#" target="_blank" class="btn-wa-order">WhatsApp</a>
             </div>
         </header>
 
         <!-- Search Bar -->
-        <input type="text" id="catalog-search-input" class="search-bar" placeholder="Buscar producto en el catálogo..." style="display: none;">
+        <input type="text" id="catalog-search-input" class="search-box" placeholder="Buscar producto en el catálogo..." style="display: none;">
 
-        <!-- Products Grid -->
-        <div id="products-grid" class="catalog-grid cols-3">
-            <!-- Dynamic product cards -->
+        <!-- Grid Container -->
+        <div id="catalog-layout-wrapper" class="layout-grid">
+            <div id="products-grid" class="products-grid cols-3">
+                <!-- Dynamic Products -->
+            </div>
         </div>
     </div>
 
@@ -238,14 +301,14 @@
             }
 
             if (!biz) {
-                document.body.innerHTML = '<h2>Negocio no encontrado</h2>';
+                document.getElementById('catalog-main-wrapper').innerHTML = '<h2>Negocio no encontrado</h2>';
                 return;
             }
 
             const catalogConfig = window.wisbeDB.getCatalogConfig(biz.id);
             const products = window.wisbeDB.getProducts(biz.id);
 
-            // Apply Business Details
+            // Populate Business Details
             document.getElementById('cat-biz-name').textContent = biz.name;
             document.getElementById('cat-biz-tagline').textContent = biz.tagline || '';
             if (biz.logo_url) {
@@ -254,32 +317,40 @@
                 logoImg.style.display = 'block';
             }
 
-            const headerWaBtn = document.getElementById('btn-header-wa');
+            const headerWa = document.getElementById('btn-header-wa');
             if (biz.whatsapp) {
-                headerWaBtn.href = `https://wa.me/${biz.whatsapp}?text=${encodeURIComponent('Hola, me gustaría solicitar información')}`;
+                headerWa.href = `https://wa.me/${biz.whatsapp}?text=${encodeURIComponent('Hola, me interesa obtener información de sus productos')}`;
             }
 
-            // Apply Catalog Configs
-            const grid = document.getElementById('products-grid');
-            grid.className = `catalog-grid layout-${catalogConfig.layout_style || 'grid'} cols-${catalogConfig.columns || 3}`;
+            // Apply Layout Customizations
+            const layoutWrapper = document.getElementById('catalog-layout-wrapper');
+            layoutWrapper.className = `layout-${catalogConfig.layout_style || 'grid'}`;
 
+            const grid = document.getElementById('products-grid');
+            grid.className = `products-grid cols-${catalogConfig.columns || 3}`;
+
+            if (catalogConfig.button_color) {
+                document.documentElement.style.setProperty('--btn-color', catalogConfig.button_color);
+            }
+
+            // Search Filter
             const searchInput = document.getElementById('catalog-search-input');
             if (catalogConfig.show_search !== false) {
                 searchInput.style.display = 'block';
                 searchInput.addEventListener('input', (e) => {
                     const query = e.target.value.toLowerCase();
                     const filtered = products.filter(p => p.name.toLowerCase().includes(query) || p.description?.toLowerCase().includes(query));
-                    renderProductsGrid(filtered, biz, catalogConfig);
+                    renderGrid(filtered, biz, catalogConfig);
                 });
             }
 
-            renderProductsGrid(products, biz, catalogConfig);
+            renderGrid(products, biz, catalogConfig);
         }
 
-        function renderProductsGrid(products, biz, config) {
+        function renderGrid(products, biz, config) {
             const grid = document.getElementById('products-grid');
             if (products.length === 0) {
-                grid.innerHTML = '<p style="color: #94a3b8; grid-column: 1/-1;">No hay productos disponibles en este momento.</p>';
+                grid.innerHTML = '<p style="color: var(--text-muted); grid-column: 1/-1;">No hay productos registrados en este catálogo.</p>';
                 return;
             }
 
@@ -296,7 +367,7 @@
                             <p class="product-desc">${p.description || ''}</p>
                             <div class="product-footer">
                                 ${config.show_prices !== false ? `<span class="product-price">$${p.price.toFixed(2)}</span>` : '<span></span>'}
-                                <a href="${waUrl}" target="_blank" class="btn-order-wa" style="background: ${config.button_color || '#2563eb'}">
+                                <a href="${waUrl}" target="_blank" class="btn-wa-order">
                                     Pedir por WhatsApp
                                 </a>
                             </div>
