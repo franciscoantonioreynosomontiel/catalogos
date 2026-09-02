@@ -8,400 +8,372 @@
 </head>
 <body>
 
-    <!-- LOGIN MODAL / VIEW -->
-    <div id="login-screen" class="login-screen">
-        <div class="login-card">
-            <div style="text-align: center; margin-bottom: 1.5rem;">
-                <h1 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 0.25rem;">Wisbe</h1>
-                <p style="color: var(--text-muted); font-size: 0.85rem;">Ingresa a tu cuenta para administrar tu negocio</p>
+    <!-- Auth View (Login) -->
+    <div id="view-login" class="auth-body" style="display: none;">
+        <div class="auth-card">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <h1 style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">Wisbe Platform</h1>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem;">Inicia sesión para gestionar tus clientes y páginas</p>
             </div>
 
             <form id="login-form">
                 <div class="form-group">
-                    <label class="form-label" for="login-username">Usuario / Email</label>
-                    <input type="text" id="login-username" class="form-control" placeholder="Antonio" required>
+                    <label class="form-label" for="login-username">Usuario</label>
+                    <input type="text" id="login-username" class="form-control" value="Antonio" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="login-password">Contraseña</label>
-                    <input type="password" id="login-password" class="form-control" placeholder="12345" required>
+                    <input type="password" id="login-password" class="form-control" value="12345" required>
                 </div>
-                <div id="login-error" style="color: var(--accent-red, #ef4444); font-size: 0.82rem; margin-bottom: 1rem; display: none;"></div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">Iniciar Sesión</button>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Iniciar Sesión</button>
             </form>
+            <div id="login-error" style="color: var(--danger); font-size: 0.85rem; margin-top: 1rem; display: none; text-align: center;">
+                Credenciales inválidas.
+            </div>
         </div>
     </div>
 
-    <!-- MAIN APP WRAPPER -->
-    <div id="app-container" style="display: none;">
+    <!-- Main Platform View with Lateral Sidebar -->
+    <div id="view-app" class="app-layout" style="display: none;">
 
-        <!-- SIDEBAR -->
+        <!-- Lateral Navigation Bar (Panel Lateral) -->
         <aside class="sidebar">
             <div class="sidebar-header">
-                <div class="brand-logo">
-                    Wisbe
-                    <span id="role-badge" class="brand-badge">Admin</span>
-                </div>
+                <a href="#" class="brand-logo">Wisbe</a>
+                <span id="user-role-badge" class="brand-badge">Admin</span>
             </div>
 
-            <div class="sidebar-nav">
-                <!-- Admin Section Navigation -->
-                <div id="admin-nav-section" style="display: none;">
-                    <div class="nav-section-title">Administración</div>
-                    <div class="nav-item active" data-view="admin-clients">
-                        Clientes / Cuentas
-                    </div>
-                </div>
+            <div class="sidebar-content">
+                <div class="nav-group-title">Administración</div>
+                <a href="#" class="nav-link active" data-nav="clientes">Clientes / Cuentas</a>
+                <a href="#" class="nav-link" data-nav="usuarios">Usuarios</a>
 
-                <!-- Client / Portal Navigation -->
-                <div class="nav-section-title">Módulos del Cliente</div>
-                <div class="nav-item" data-view="business-info">
-                    Información del Negocio
-                </div>
-                <div class="nav-item" data-view="catalog-editor">
-                    Catálogo de Productos
-                </div>
-                <div class="nav-item" data-view="landing-editor">
-                    Landing Page
-                </div>
-                <div class="nav-item" data-view="widget-code">
-                    Códigos / Widgets Embed
-                </div>
-
-                <!-- Admin Client Switcher Box -->
-                <div id="sidebar-client-selector-box" style="margin-top: 1.5rem; display: none;">
-                    <div class="nav-section-title">Cliente Seleccionado</div>
-                    <div id="sidebar-clients-list" style="display: flex; flex-direction: column; gap: 0.25rem; margin-top: 0.4rem;">
-                        <!-- Dynamic list of clients -->
-                    </div>
-                </div>
+                <div class="nav-group-title" style="margin-top: 1rem;">Diseño & Edición</div>
+                <a href="#" class="nav-link" data-nav="catalogo">Catálogo de Productos</a>
+                <a href="#" class="nav-link" data-nav="landing">Landing Page</a>
+                <a href="#" class="nav-link" data-nav="widgets">Enlaces & Widgets</a>
             </div>
 
             <div class="sidebar-footer">
-                <div class="user-profile">
+                <div class="active-client-box">
+                    <div class="active-client-label">Cliente Activo</div>
+                    <div id="sidebar-active-client-name" class="active-client-name">Ningún Cliente</div>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between;">
                     <div>
-                        <div id="user-display-name" class="user-name">Antonio</div>
-                        <div id="user-display-email" class="user-role">antonio@wisbe.com</div>
+                        <div id="sidebar-user-name" style="font-weight: 600; font-size: 0.85rem;">Antonio</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">Admin</div>
                     </div>
-                    <button id="btn-logout" class="btn btn-secondary btn-sm" style="padding: 0.25rem 0.5rem;" title="Cerrar sesión">Salir</button>
+                    <button id="btn-logout" class="btn btn-secondary btn-sm">Salir</button>
                 </div>
             </div>
         </aside>
 
-        <!-- MAIN CONTENT AREA -->
+        <!-- Main Content Area -->
         <div class="main-wrapper">
-            <!-- TOPBAR -->
-            <header class="topbar">
-                <div class="topbar-title" id="topbar-title-text">
-                    Gestión de Clientes
-                </div>
-                <div class="topbar-actions">
-                    <div class="active-client-pill" id="active-client-indicator">
-                        Cliente Activo: <strong id="active-client-name">Solaris Power Solutions</strong>
-                    </div>
+            <header class="top-bar">
+                <h2 id="current-page-title" class="page-title">Clientes / Cuentas</h2>
+                <div id="top-active-client-tag" style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;">
+                    Cliente Activo: <strong id="top-active-client-name" style="color: var(--primary);">Solaris Power Solutions</strong>
                 </div>
             </header>
 
-            <!-- VIEWS CONTAINER -->
-            <main class="content-area">
+            <main class="main-content">
 
-                <!-- 1. ADMIN CLIENTS MANAGEMENT VIEW -->
-                <section id="view-admin-clients" class="app-view" style="display: none;">
+                <!-- 1. Clientes Section -->
+                <section id="section-clientes" class="app-section">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                         <div>
-                            <h2>Control de Clientes</h2>
-                            <p style="color: var(--text-muted); font-size: 0.85rem;">Crea cuentas y accede directamente a editar el catálogo o landing page de cada cliente.</p>
+                            <h3 style="font-size: 1.25rem; font-weight: 600;">Gestión de Clientes y Negocios</h3>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary);">Crea cuentas para tus clientes o administra sus catálogos y landings desde tu panel admin.</p>
                         </div>
                         <button id="btn-open-create-client" class="btn btn-primary">+ Nuevo Cliente</button>
                     </div>
 
-                    <div class="card" style="padding: 0; overflow: hidden;">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Negocio</th>
-                                    <th>Giro / Tipo</th>
-                                    <th>WhatsApp</th>
-                                    <th>Email</th>
-                                    <th style="text-align: right;">Acciones de Edición</th>
-                                </tr>
-                            </thead>
-                            <tbody id="clients-table-body">
-                                <!-- Dynamic Rows -->
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-
-                <!-- 2. BUSINESS INFO EDITOR VIEW -->
-                <section id="view-business-info" class="app-view" style="display: none;">
-                    <div style="margin-bottom: 1.5rem;">
-                        <h2>Información General del Negocio</h2>
-                        <p style="color: var(--text-muted); font-size: 0.85rem;">Estos datos alimentan automáticamente la Landing Page y el Catálogo.</p>
-                    </div>
-
-                    <form id="business-info-form" class="card">
-                        <div class="grid-2">
-                            <div class="form-group">
-                                <label class="form-label" for="biz-name">Nombre Comercial del Negocio</label>
-                                <input type="text" id="biz-name" class="form-control" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="biz-tagline">Eslogan o Frase Corta</label>
-                                <input type="text" id="biz-tagline" class="form-control">
-                            </div>
-                        </div>
-
-                        <div class="grid-3">
-                            <div class="form-group">
-                                <label class="form-label" for="biz-phone">Teléfono de Contacto</label>
-                                <input type="text" id="biz-phone" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="biz-whatsapp">WhatsApp (número con clave de país)</label>
-                                <input type="text" id="biz-whatsapp" class="form-control" placeholder="528112345678" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="biz-email">Email del Negocio</label>
-                                <input type="email" id="biz-email" class="form-control" required>
-                            </div>
-                        </div>
-
-                        <div class="grid-2">
-                            <div class="form-group">
-                                <label class="form-label" for="biz-address">Dirección Física</label>
-                                <input type="text" id="biz-address" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="biz-type">Giro de Negocio</label>
-                                <select id="biz-type" class="form-control">
-                                    <option value="solar">Energía Solar / Paneles Solares</option>
-                                    <option value="hvac">Aire Acondicionado / Minisplits</option>
-                                    <option value="paint">Pinturas y Recubrimientos</option>
-                                    <option value="hardware">Ferretería y Herramientas</option>
-                                    <option value="general">Servicios o Productos Generales</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="grid-2">
-                            <div class="form-group">
-                                <label class="form-label" for="biz-logo-file">Logo del Negocio</label>
-                                <input type="file" id="biz-logo-file" class="form-control" accept="image/*" style="margin-bottom: 0.4rem;">
-                                <input type="text" id="biz-logo-url" class="form-control" placeholder="o pega URL de la imagen">
+                    <!-- Create Client Card (Form) -->
+                    <div id="card-create-client" class="card" style="display: none; margin-bottom: 2rem;">
+                        <div class="card-title">Registrar Nuevo Cliente</div>
+                        <form id="form-create-client">
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label class="form-label">Nombre de la Empresa / Cliente</label>
+                                    <input type="text" id="client-input-name" class="form-control" placeholder="Ej. Ferretería El Candado" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Giro / Categoría del Negocio</label>
+                                    <input type="text" id="client-input-category" class="form-control" placeholder="Ej. Ferretería, Paneles Solares, Minisplits" required>
+                                </div>
                             </div>
                             <div class="grid-2">
                                 <div class="form-group">
-                                    <label class="form-label" for="biz-brand-primary">Color Principal</label>
-                                    <input type="color" id="biz-brand-primary" class="form-control" style="height: 38px; padding: 2px;">
+                                    <label class="form-label">Teléfono / WhatsApp</label>
+                                    <input type="text" id="client-input-phone" class="form-control" placeholder="Ej. +5215512345678" required>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label" for="biz-brand-accent">Color Botones / Acento</label>
-                                    <input type="color" id="biz-brand-accent" class="form-control" style="height: 38px; padding: 2px;">
+                                    <label class="form-label">Correo Electrónico</label>
+                                    <input type="email" id="client-input-email" class="form-control" placeholder="contacto@empresa.com" required>
                                 </div>
                             </div>
-                        </div>
+                            <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+                                <button type="button" id="btn-cancel-client" class="btn btn-secondary">Cancelar</button>
+                                <button type="submit" class="btn btn-primary">Guardar Cliente</button>
+                            </div>
+                        </form>
+                    </div>
 
-                        <div style="margin-top: 1rem; text-align: right;">
-                            <button type="submit" class="btn btn-primary">Guardar Información</button>
+                    <!-- Client Table -->
+                    <div class="card" style="padding: 0;">
+                        <div class="table-container">
+                            <table class="data-table">
+                               <thead>
+                                   <tr>
+                                       <th>ID Cliente</th>
+                                       <th>Empresa</th>
+                                       <th>Categoría</th>
+                                       <th>WhatsApp</th>
+                                       <th>Estado</th>
+                                       <th>Acciones Rápidas</th>
+                                   </tr>
+                               </thead>
+                               <tbody id="clients-table-body">
+                                   <!-- Rendered dynamically -->
+                               </tbody>
+                            </table>
                         </div>
-                    </form>
+                    </div>
                 </section>
 
-                <!-- 3. PRODUCT CATALOG EDITOR VIEW -->
-                <section id="view-catalog-editor" class="app-view" style="display: none;">
-                    <div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+                <!-- 2. Usuarios Section -->
+                <section id="section-usuarios" class="app-section" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                         <div>
-                            <h2>Editor del Catálogo de Productos</h2>
-                            <p style="color: var(--text-muted); font-size: 0.85rem;">Carga tus productos y personaliza el formato de presentación.</p>
+                            <h3 style="font-size: 1.25rem; font-weight: 600;">Usuarios y Permisos</h3>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary);">Administra las cuentas con acceso a la plataforma Wisbe.</p>
+                        </div>
+                        <button id="btn-open-create-user" class="btn btn-primary">+ Nuevo Usuario</button>
+                    </div>
+
+                    <!-- Create User Card -->
+                    <div id="card-create-user" class="card" style="display: none; margin-bottom: 2rem;">
+                        <div class="card-title">Crear Nuevo Usuario</div>
+                        <form id="form-create-user">
+                            <div class="grid-3">
+                                <div class="form-group">
+                                    <label class="form-label">Nombre Completo</label>
+                                    <input type="text" id="user-input-name" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Nombre de Usuario</label>
+                                    <input type="text" id="user-input-username" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Rol de Acceso</label>
+                                    <select id="user-input-role" class="form-control">
+                                        <option value="admin">Administrador (Acceso Total)</option>
+                                        <option value="client">Cliente (Acceso Limitado)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+                                <button type="button" id="btn-cancel-user" class="btn btn-secondary">Cancelar</button>
+                                <button type="submit" class="btn btn-primary">Guardar Usuario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="card" style="padding: 0;">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Usuario</th>
+                                        <th>Nombre</th>
+                                        <th>Rol</th>
+                                        <th>Fecha Registro</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-table-body">
+                                    <!-- Rendered dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. Catálogo Editor Section -->
+                <section id="section-catalogo" class="app-section" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <div>
+                            <h3 style="font-size: 1.25rem; font-weight: 600;">Editor de Catálogo de Productos</h3>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary);">Carga productos rápidamente y personaliza la disposición del catálogo.</p>
                         </div>
                         <div style="display: flex; gap: 0.5rem;">
-                            <button id="btn-open-add-product" class="btn btn-primary btn-sm">+ Agregar Producto</button>
-                            <a id="btn-open-public-catalog" href="#" target="_blank" class="btn btn-secondary btn-sm">Ver Catálogo Público ↗</a>
+                            <button id="btn-add-product" class="btn btn-primary">+ Agregar Producto</button>
+                            <a id="btn-open-public-catalog" href="#" target="_blank" class="btn btn-secondary">Ver Catálogo Público ↗</a>
                         </div>
                     </div>
 
-                    <div class="editor-split-layout">
-                        <!-- Left Panel: Controls & Product List -->
-                        <div style="display: flex; flex-direction: column; gap: 1.25rem;">
-                            <!-- Layout & Customization -->
-                            <div class="card">
-                                <h4 style="margin-bottom: 1rem;">Estilo e Interfaz</h4>
-                                <form id="catalog-config-form">
-                                    <div class="grid-2">
-                                        <div class="form-group">
-                                            <label class="form-label" for="cat-layout-style">Diseño</label>
-                                            <select id="cat-layout-style" class="form-control">
-                                                <option value="grid">Retícula Elegante</option>
-                                                <option value="list">Lista Horizontal</option>
-                                                <option value="compact">Tabla Ficha Técnica</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="form-label" for="cat-columns">Columnas (Grid)</label>
-                                            <select id="cat-columns" class="form-control">
-                                                <option value="2">2 Columnas</option>
-                                                <option value="3">3 Columnas</option>
-                                                <option value="4">4 Columnas</option>
-                                            </select>
-                                        </div>
+                    <div class="grid-editor">
+                        <!-- Product Form & Settings -->
+                        <div>
+                            <!-- Product Add/Edit Form -->
+                            <div id="card-product-form" class="card" style="display: none;">
+                                <div class="card-title" id="product-form-title">Nuevo Producto</div>
+                                <form id="form-save-product">
+                                    <input type="hidden" id="prod-id">
+                                    <div class="form-group">
+                                        <label class="form-label">Nombre del Producto</label>
+                                        <input type="text" id="prod-name" class="form-control" required>
                                     </div>
-
-                                    <div class="grid-2">
-                                        <div class="form-group">
-                                            <label class="form-label" for="cat-badge-text">Texto Badge</label>
-                                            <input type="text" id="cat-badge-text" class="form-control" placeholder="Disponible">
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="form-label" for="cat-btn-color">Color Botón WhatsApp</label>
-                                            <input type="color" id="cat-btn-color" class="form-control" style="height: 38px; padding: 2px;">
-                                        </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Precio ($)</label>
+                                        <input type="number" id="prod-price" class="form-control" step="0.01" required>
                                     </div>
-
-                                    <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
-                                        <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.82rem;">
-                                            <input type="checkbox" id="cat-show-prices" checked> Mostrar Precios
-                                        </label>
-                                        <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.82rem;">
-                                            <input type="checkbox" id="cat-show-search" checked> Buscador
-                                        </label>
+                                    <div class="form-group">
+                                        <label class="form-label">URL de Imagen (Cloudinary / Directo)</label>
+                                        <input type="text" id="prod-image" class="form-control" placeholder="https://..." required>
                                     </div>
-
-                                    <button type="submit" class="btn btn-secondary btn-sm" style="width: 100%; margin-top: 1rem;">Aplicar Estilos</button>
+                                    <div class="form-group">
+                                        <label class="form-label">Descripción Breve</label>
+                                        <textarea id="prod-desc" class="form-control"></textarea>
+                                    </div>
+                                    <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                                        <button type="button" id="btn-cancel-product" class="btn btn-secondary">Cancelar</button>
+                                        <button type="submit" class="btn btn-primary">Guardar Producto</button>
+                                    </div>
                                 </form>
+                            </div>
+
+                            <!-- Design Customizer -->
+                            <div class="card">
+                                <div class="card-title">Estilo e Interfaz del Catálogo</div>
+                                <div class="form-group">
+                                    <label class="form-label">Columnas del Catálogo</label>
+                                    <select id="cat-grid-cols" class="form-control">
+                                        <option value="2">2 Columnas</option>
+                                        <option value="3" selected>3 Columnas</option>
+                                        <option value="4">4 Columnas</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Texto de Etiqueta (Badge)</label>
+                                    <input type="text" id="cat-badge-text" class="form-control" value="En Stock">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Color del Botón WhatsApp</label>
+                                    <input type="color" id="cat-btn-color" class="form-control" value="#25d366" style="height: 40px; padding: 2px;">
+                                </div>
+                                <button id="btn-save-catalog-style" class="btn btn-secondary" style="width: 100%;">Aplicar Estilo</button>
                             </div>
 
                             <!-- Products List -->
                             <div class="card">
-                                <h4 style="margin-bottom: 0.75rem;">Productos en Catálogo</h4>
-                                <div id="products-list-container" style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 360px; overflow-y: auto;">
-                                    <!-- Dynamic list of products -->
+                                <div class="card-title">Productos Cargados</div>
+                                <div id="catalog-products-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                    <!-- Rendered dynamically -->
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- Right Panel: Live Preview -->
-                        <div class="preview-container">
-                            <div class="preview-toolbar">
-                                <span>Vista Previa del Catálogo</span>
-                                <span id="preview-catalog-biz-label">Solaris Power</span>
-                            </div>
-                            <iframe id="catalog-preview-iframe" style="width: 100%; height: 680px; border: none;"></iframe>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 4. LANDING PAGE EDITOR VIEW -->
-                <section id="view-landing-editor" class="app-view" style="display: none;">
-                    <div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <h2>Editor de Landing Page</h2>
-                            <p style="color: var(--text-muted); font-size: 0.85rem;">Personaliza la landing page para el cliente activo.</p>
-                        </div>
-                        <a id="btn-open-public-landing" href="#" target="_blank" class="btn btn-secondary btn-sm">Ver Página Pública ↗</a>
-                    </div>
-
-                    <div class="editor-split-layout">
-                        <!-- Controls Form -->
-                        <div class="card" style="max-height: 750px; overflow-y: auto;">
-                            <form id="landing-editor-form">
-                                <h4 style="margin-bottom: 1rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border-color);">Hero Principal</h4>
-
-                                <div class="form-group">
-                                    <label class="form-label" for="lp-badge">Etiqueta Superior</label>
-                                    <input type="text" id="lp-badge" class="form-control">
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label" for="lp-hero-title">Título Principal</label>
-                                    <textarea id="lp-hero-title" class="form-control" rows="2"></textarea>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label" for="lp-hero-subtitle">Subtítulo Descriptivo</label>
-                                    <textarea id="lp-hero-subtitle" class="form-control" rows="2"></textarea>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label" for="lp-hero-cta">Texto Botón WhatsApp</label>
-                                    <input type="text" id="lp-hero-cta" class="form-control">
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label" for="lp-hero-img-file">Imagen Hero</label>
-                                    <input type="file" id="lp-hero-img-file" class="form-control" accept="image/*" style="margin-bottom: 0.4rem;">
-                                    <input type="text" id="lp-hero-img-url" class="form-control" placeholder="URL de la imagen">
-                                </div>
-
-                                <h4 style="margin: 1.25rem 0 0.75rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border-color);">Beneficios Clave</h4>
-                                <div id="lp-features-container">
-                                    <!-- Dynamic feature inputs -->
-                                </div>
-
-                                <h4 style="margin: 1.25rem 0 0.75rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border-color);">Sobre Nosotros</h4>
-                                <div class="form-group">
-                                    <label class="form-label" for="lp-about-title">Título Sección</label>
-                                    <input type="text" id="lp-about-title" class="form-control">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label" for="lp-about-desc">Descripción</label>
-                                    <textarea id="lp-about-desc" class="form-control" rows="3"></textarea>
-                                </div>
-
-                                <h4 style="margin: 1.25rem 0 0.75rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border-color);">Llamado a la Acción Final</h4>
-                                <div class="form-group">
-                                    <label class="form-label" for="lp-cta-title">Título Banner</label>
-                                    <input type="text" id="lp-cta-title" class="form-control">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label" for="lp-cta-subtitle">Subtítulo Banner</label>
-                                    <input type="text" id="lp-cta-subtitle" class="form-control">
-                                </div>
-
-                                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Guardar Cambios Landing</button>
-                            </form>
                         </div>
 
                         <!-- Live Interactive Preview -->
                         <div class="preview-container">
-                            <div class="preview-toolbar">
-                                <span>Vista Previa Landing Page</span>
-                                <span id="preview-biz-name-label">Solaris Power</span>
+                            <div class="preview-bar">
+                                <span>Vista Previa del Catálogo</span>
+                                <span id="preview-client-label" style="font-size: 0.75rem; color: var(--text-muted);">Solaris Power Solutions</span>
                             </div>
-                            <iframe id="landing-preview-iframe" style="width: 100%; height: 680px; border: none;"></iframe>
+                            <iframe id="catalog-preview-iframe" class="preview-frame" src="public_catalog.html"></iframe>
                         </div>
                     </div>
                 </section>
 
-                <!-- 5. WIDGET EMBED CODE GENERATOR VIEW -->
-                <section id="view-widget-code" class="app-view" style="display: none;">
+                <!-- 4. Landing Page Editor Section -->
+                <section id="section-landing" class="app-section" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <div>
+                            <h3 style="font-size: 1.25rem; font-weight: 600;">Editor de Landing Page Universal</h3>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary);">Personaliza la plantilla universal para cualquier tipo de negocio (Paneles solares, minisplits, pintura, ferretería, etc.).</p>
+                        </div>
+                        <a id="btn-open-public-landing" href="#" target="_blank" class="btn btn-secondary">Ver Landing Pública ↗</a>
+                    </div>
+
+                    <div class="grid-editor">
+                        <!-- Customization Form -->
+                        <div>
+                            <div class="card">
+                                <div class="card-title">Sección Principal (Hero)</div>
+                                <div class="form-group">
+                                    <label class="form-label">Título Principal (Hero Title)</label>
+                                    <input type="text" id="land-hero-title" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Subtítulo Descriptivo</label>
+                                    <textarea id="land-hero-subtitle" class="form-control"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Texto del Botón Principal</label>
+                                    <input type="text" id="land-hero-btn" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Imagen Destacada (URL)</label>
+                                    <input type="text" id="land-hero-img" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-title">Información de Contacto</div>
+                                <div class="form-group">
+                                    <label class="form-label">Mensaje de WhatsApp Predeterminado</label>
+                                    <input type="text" id="land-whatsapp-msg" class="form-control" value="Hola, quiero más información sobre sus servicios.">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Dirección / Ubicación</label>
+                                    <input type="text" id="land-address" class="form-control">
+                                </div>
+                                <button id="btn-save-landing-data" class="btn btn-primary" style="width: 100%;">Guardar Cambios de Landing</button>
+                            </div>
+                        </div>
+
+                        <!-- Live Preview -->
+                        <div class="preview-container">
+                            <div class="preview-bar">
+                                <span>Vista Previa de Landing Page</span>
+                            </div>
+                            <iframe id="landing-preview-iframe" class="preview-frame" src="public_landing.html"></iframe>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 5. Enlaces & Widgets Section -->
+                <section id="section-widgets" class="app-section" style="display: none;">
                     <div style="margin-bottom: 1.5rem;">
-                        <h2>Integración con Custom Tags (`wisbe_landingPage` & `wisbe_catalogo`)</h2>
-                        <p style="color: var(--text-muted); font-size: 0.85rem;">Copia estas etiquetas personalizadas para incrustar el catálogo o la landing page en la web del cliente.</p>
+                        <h3 style="font-size: 1.25rem; font-weight: 600;">Integración de Enlaces y Widgets (Custom Labels)</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary);">Genera links públicos directos o inserta los widgets de Wisbe en el sitio web de tu cliente usando custom tags.</p>
                     </div>
 
                     <div class="grid-2">
-                        <!-- Landing Page Widget -->
+                        <!-- Public Links -->
                         <div class="card">
-                            <h3 style="margin-bottom: 0.5rem; font-size: 1rem;">Widget Landing Page (`wisbe_landingPage`)</h3>
-                            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1rem;">Etiqueta HTML personalizada:</p>
-
-                            <div class="code-box" id="code-snippet-landing">
-&lt;wisbe_landingPage business="<span class="code-slug">solaris-power</span>"&gt;&lt;/wisbe_landingPage&gt;
-&lt;script src="https://wisbe-platform.com/widget.js"&gt;&lt;/script&gt;
+                            <div class="card-title">Enlaces Públicos Directos</div>
+                            <div class="form-group">
+                                <label class="form-label">Link Público del Catálogo</label>
+                                <input type="text" id="widget-catalog-link" class="form-control" readonly>
                             </div>
-                            <button class="btn btn-secondary btn-sm" style="margin-top: 1rem;" onclick="copyCode('code-snippet-landing')">Copiar Código</button>
+                            <div class="form-group">
+                                <label class="form-label">Link Público de la Landing Page</label>
+                                <input type="text" id="widget-landing-link" class="form-control" readonly>
+                            </div>
                         </div>
 
-                        <!-- Catalog Widget -->
+                        <!-- Custom Labels Embed -->
                         <div class="card">
-                            <h3 style="margin-bottom: 0.5rem; font-size: 1rem;">Widget Catálogo (`wisbe_catalogo`)</h3>
-                            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1rem;">Etiqueta HTML personalizada:</p>
+                            <div class="card-title">Código de Integración (Custom Labels)</div>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem;">Paso 1: Incluye el script de Wisbe en la web destino:</p>
+                            <div class="code-box">&lt;script src="https://tu-dominio.com/docs/widget.js"&gt;&lt;/script&gt;</div>
 
-                            <div class="code-box" id="code-snippet-catalog">
-&lt;wisbe_catalogo business="<span class="code-slug">solaris-power</span>"&gt;&lt;/wisbe_catalogo&gt;
-&lt;script src="https://wisbe-platform.com/widget.js"&gt;&lt;/script&gt;
-                            </div>
-                            <button class="btn btn-secondary btn-sm" style="margin-top: 1rem;" onclick="copyCode('code-snippet-catalog')">Copiar Código</button>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 1rem; margin-bottom: 0.75rem;">Paso 2: Inserta el Custom Label donde quieras mostrar la landing o catálogo:</p>
+                            <div class="code-box" id="code-widget-tag-landing">&lt;wisbe_landingPage client-id="1"&gt;&lt;/wisbe_landingPage&gt;</div>
+                            <div class="code-box" id="code-widget-tag-catalog" style="margin-top: 0.5rem;">&lt;wisbe_catalogo client-id="1"&gt;&lt;/wisbe_catalogo&gt;</div>
                         </div>
                     </div>
                 </section>
@@ -410,86 +382,9 @@
         </div>
     </div>
 
-    <!-- MODAL: ADD / EDIT CLIENT (ADMIN) -->
-    <div id="modal-client" class="modal-overlay">
-        <div class="modal-box">
-            <h3 style="margin-bottom: 1.25rem;" id="modal-client-title">Crear Nuevo Cliente</h3>
-            <form id="form-client">
-                <input type="hidden" id="client-id">
-                <div class="form-group">
-                    <label class="form-label" for="modal-biz-name">Nombre del Negocio</label>
-                    <input type="text" id="modal-biz-name" class="form-control" placeholder="Ej. Pinturas del Norte" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="modal-biz-type">Giro Comercial</label>
-                    <select id="modal-biz-type" class="form-control">
-                        <option value="solar">Energía Solar</option>
-                        <option value="hvac">HVAC / Minisplits</option>
-                        <option value="paint">Pintura y Recubrimientos</option>
-                        <option value="hardware">Ferretería</option>
-                        <option value="general">General</option>
-                    </select>
-                </div>
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label class="form-label" for="modal-biz-whatsapp">WhatsApp</label>
-                        <input type="text" id="modal-biz-whatsapp" class="form-control" placeholder="528112345678" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="modal-biz-email">Email del Cliente</label>
-                        <input type="email" id="modal-biz-email" class="form-control" placeholder="cliente@correo.com" required>
-                    </div>
-                </div>
-                <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
-                    <button type="button" class="btn btn-secondary" id="btn-close-client-modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Guardar Cliente</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL: ADD / EDIT PRODUCT -->
-    <div id="modal-product" class="modal-overlay">
-        <div class="modal-box">
-            <h3 style="margin-bottom: 1.25rem;" id="modal-product-title">Agregar Producto</h3>
-            <form id="form-product">
-                <input type="hidden" id="product-id">
-                <div class="form-group">
-                    <label class="form-label" for="prod-name">Nombre del Producto</label>
-                    <input type="text" id="prod-name" class="form-control" required>
-                </div>
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label class="form-label" for="prod-price">Precio ($)</label>
-                        <input type="number" step="0.01" id="prod-price" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="prod-category">Categoría</label>
-                        <input type="text" id="prod-category" class="form-control" placeholder="General">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="prod-desc">Descripción</label>
-                    <textarea id="prod-desc" class="form-control" rows="3"></textarea>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="prod-img-file">Imagen (Subir archivo o pegar URL)</label>
-                    <input type="file" id="prod-img-file" class="form-control" accept="image/*" style="margin-bottom: 0.4rem;">
-                    <input type="text" id="prod-img-url" class="form-control" placeholder="https://...">
-                </div>
-                <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
-                    <button type="button" class="btn btn-secondary" id="btn-close-product-modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Guardar Producto</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- SCRIPTS -->
-    <script src="config.js"></script>
-    <script src="db.js"></script>
-    <script src="cloudinary.js"></script>
+    <!-- Application JavaScript Logic -->
     <script src="auth.js"></script>
+    <script src="db.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
