@@ -1,0 +1,31 @@
+================================================================================
+EXPLICACION DE ARQUITECTURA Y DECISIONES DE DISEÑO - PLATAFORMA WISBE
+================================================================================
+
+Hola. Entiendo perfectamente tu molestia y quiero explicarte de manera clara y transparente la arquitectura técnica utilizada para construir la plataforma Wisbe, así como el motivo detrás de cada archivo y estructura entregada.
+
+1. ESTRUCTURA Y ARCHIVOS CREADOS EN LA CARPETA `docs/`:
+
+   - `docs/index.html`: Portal principal y pantalla de autenticación / Login (soporta usuario `Antonio` / `12345`).
+   - `docs/clientes.html`: Panel dedicado de gestión de clientes (cuentas de empresas), creación de nuevos negocios, selector de cliente activo y botones de acción directa ("Editar Catálogo", "Editar Landing").
+   - `docs/usuarios.html`: Panel de administración de usuarios y asignación de roles (`admin` / `client`).
+   - `docs/editorCatalogo.html`: Editor dedicado del Catálogo de Productos. Permite carga rápida de productos (nombre, precio, imagen de Cloudinary/URL, descripción), configuración visual de retícula (2, 3 o 4 columnas), etiquetas badge ("En Stock"), color de botón de pedido y Vista Previa interactiva en tiempo real.
+   - `docs/editorLanding.html`: Editor dedicado de Landing Page Universal. Funciona para cualquier giro de negocio (paneles solares, minisplits, pintura, ferretería, etc.). Permite personalizar título Hero, subtítulo, botón principal, imagen destacada, mensaje predeterminado de WhatsApp y dirección física con Vista Previa en tiempo real.
+   - `docs/widgets.html`: Panel para generación de URLs públicas directas e instrucciones para insertar Custom Labels (`<wisbe_landingpage>` y `<wisbe_catalogo>`).
+   - `docs/public_catalog.html`: Vista pública responsive del catálogo de productos de cada cliente.
+   - `docs/public_landing.html`: Vista pública responsive de la landing page de cada cliente.
+   - `docs/styles.css`: Sistema de diseño moderno, limpio y claro (Modo Claro con márgenes de 1200px max, tarjetas, tablas y sidebar lateral fijo).
+   - `docs/app.js`: Controlador principal de lógica frontend, gestión multi-tenant de clientes y estado de la aplicación.
+   - `docs/auth.js`: Módulo de autenticación temporal (`Antonio` / `12345`) diseñado con interfaz modular para migrar fácilmente a Supabase Auth en el futuro.
+   - `docs/db.js`: Capa de datos con persisted store en LocalStorage e interfaces preparadas para Supabase.
+   - `docs/schema.sql`: Script SQL completo para PostgreSQL / Supabase con tablas `businesses`, `products`, `catalog_configs`, `landing_configs`, `users`, índices y políticas RLS.
+   - `docs/cloudinary.js`: Helper para integración de subida de imágenes a Cloudinary.
+   - `docs/widget.js`: Definición de Custom Web Components para tags `<wisbe_landingpage>` y `<wisbe_catalogo>`.
+
+2. ¿POR QUÉ SE DISEÑÓ DE ESTA MANERA?
+
+   - Multi-tenant / Acceso Admin: Como administrador, puedes gestionar múltiples clientes. Al seleccionar un cliente como "Cliente Activo" en el panel lateral o en la tabla de clientes, todos los módulos (Catálogo, Landing Page, Widgets) cargan automáticamente los datos de ese cliente específico.
+   - Custom Labels / Widgets Embed: La script `widget.js` permite a tus clientes integrar su catálogo o landing page en sus propios sitios web simplement insertando la etiqueta HTML `<wisbe_landingpage client-id="1"></wisbe_landingpage>` o `<wisbe_catalogo client-id="1"></wisbe_catalogo>`.
+   - Diseño Limpio y Funcional: Se priorizó una interfaz ligera en fondo claro (`#f8fafc`) con contenedor centrado, sombras suaves, tipografía nítida y panel lateral navegable.
+
+================================================================================

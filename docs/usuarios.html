@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wisbe - Usuarios y Permisos</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="brand-logo">Wisbe</a>
+                <span id="user-role-badge" class="brand-badge">Admin</span>
+            </div>
+
+            <div class="sidebar-content">
+                <div class="nav-group-title">Administración</div>
+                <a href="clientes.html" class="nav-link">Clientes / Cuentas</a>
+                <a href="usuarios.html" class="nav-link active">Usuarios</a>
+
+                <div class="nav-group-title" style="margin-top: 1rem;">Diseño & Edición</div>
+                <a href="editorCatalogo.html" class="nav-link">Catálogo de Productos</a>
+                <a href="editorLanding.html" class="nav-link">Landing Page</a>
+                <a href="widgets.html" class="nav-link">Enlaces & Widgets</a>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="active-client-box">
+                    <div class="active-client-label">Cliente Activo</div>
+                    <div id="sidebar-active-client-name" class="active-client-name">Ningún Cliente</div>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <div id="sidebar-user-name" style="font-weight: 600; font-size: 0.85rem;">Antonio</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">Admin</div>
+                    </div>
+                    <button id="btn-logout" class="btn btn-secondary btn-sm">Salir</button>
+                </div>
+            </div>
+        </aside>
+
+        <div class="main-wrapper">
+            <header class="top-bar">
+                <h2 class="page-title">Usuarios y Permisos</h2>
+                <div style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;">
+                    Cliente Activo: <strong id="top-active-client-name" style="color: var(--primary);">Solaris Power Solutions</strong>
+                </div>
+            </header>
+
+            <main class="main-content">
+                <section class="app-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <div>
+                            <h3 style="font-size: 1.25rem; font-weight: 600;">Administración de Usuarios</h3>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary);">Crea usuarios administradores o clientes con acceso a la plataforma.</p>
+                        </div>
+                        <button id="btn-open-create-user" class="btn btn-primary">+ Nuevo Usuario</button>
+                    </div>
+
+                    <div id="card-create-user" class="card" style="display: none; margin-bottom: 2rem;">
+                        <div class="card-title">Crear Nuevo Usuario</div>
+                        <form id="form-create-user">
+                            <div class="grid-3">
+                                <div class="form-group">
+                                    <label class="form-label">Nombre Completo</label>
+                                    <input type="text" id="user-input-name" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Nombre de Usuario</label>
+                                    <input type="text" id="user-input-username" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Rol de Acceso</label>
+                                    <select id="user-input-role" class="form-control">
+                                        <option value="admin">Administrador (Acceso Total)</option>
+                                        <option value="client">Cliente (Acceso Limitado)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+                                <button type="button" id="btn-cancel-user" class="btn btn-secondary">Cancelar</button>
+                                <button type="submit" class="btn btn-primary">Guardar Usuario</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="card" style="padding: 0;">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Usuario</th>
+                                        <th>Nombre</th>
+                                        <th>Rol</th>
+                                        <th>Fecha Registro</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-table-body">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="db.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

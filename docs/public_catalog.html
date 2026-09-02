@@ -34,7 +34,6 @@
             margin: 0 auto;
         }
 
-        /* Header */
         .catalog-header {
             display: flex;
             align-items: center;
@@ -72,7 +71,6 @@
             color: var(--text-muted);
         }
 
-        /* Search input */
         .search-box {
             width: 100%;
             padding: 0.75rem 1rem;
@@ -90,7 +88,6 @@
             border-color: var(--primary-color);
         }
 
-        /* Layout Styles */
         .products-grid {
             display: grid;
             gap: 1.25rem;
@@ -100,7 +97,6 @@
         .products-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
         .products-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
 
-        /* Card Design */
         .product-card {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
@@ -193,62 +189,9 @@
             opacity: 0.9;
         }
 
-        /* List Layout Option */
-        .layout-list .products-grid {
-            grid-template-columns: 1fr !important;
-        }
-
-        .layout-list .product-card {
-            flex-direction: row;
-            align-items: center;
-        }
-
-        .layout-list .product-card-img {
-            width: 180px;
-            height: 140px;
-        }
-
-        /* Compact Layout Option */
-        .layout-compact .products-grid {
-            grid-template-columns: 1fr !important;
-            gap: 0.5rem;
-        }
-
-        .layout-compact .product-card {
-            flex-direction: row;
-            padding: 0.75rem 1rem;
-            align-items: center;
-        }
-
-        .layout-compact .product-card-img {
-            width: 48px;
-            height: 48px;
-            border-radius: 6px;
-            margin-right: 1rem;
-        }
-
-        .layout-compact .product-card-body {
-            padding: 0;
-            flex-direction: row;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-        }
-
-        .layout-compact .product-desc {
-            display: none;
-        }
-
         @media (max-width: 640px) {
             .products-grid {
                 grid-template-columns: 1fr !important;
-            }
-            .layout-list .product-card {
-                flex-direction: column;
-            }
-            .layout-list .product-card-img {
-                width: 100%;
-                height: 180px;
             }
         }
     </style>
@@ -256,7 +199,6 @@
 <body>
 
     <div class="catalog-container" id="catalog-main-wrapper">
-        <!-- Header -->
         <header class="catalog-header">
             <div class="biz-brand">
                 <img id="cat-biz-logo" src="" class="biz-logo" style="display: none;">
@@ -270,10 +212,8 @@
             </div>
         </header>
 
-        <!-- Search Bar -->
         <input type="text" id="catalog-search-input" class="search-box" placeholder="Buscar producto en el catálogo..." style="display: none;">
 
-        <!-- Grid Container -->
         <div id="catalog-layout-wrapper" class="layout-grid">
             <div id="products-grid" class="products-grid cols-3">
                 <!-- Dynamic Products -->
@@ -291,10 +231,13 @@
         function renderPublicCatalog() {
             const urlParams = new URLSearchParams(window.location.search);
             const slug = urlParams.get('biz');
+            const id = urlParams.get('id');
 
             let biz = null;
             if (slug) {
                 biz = window.wisbeDB.getBusinessBySlug(slug);
+            } else if (id) {
+                biz = window.wisbeDB.getBusinessById(parseInt(id));
             } else {
                 const activeId = window.wisbeDB.getActiveBusinessId();
                 biz = window.wisbeDB.getBusinessById(activeId);
@@ -308,7 +251,6 @@
             const catalogConfig = window.wisbeDB.getCatalogConfig(biz.id);
             const products = window.wisbeDB.getProducts(biz.id);
 
-            // Populate Business Details
             document.getElementById('cat-biz-name').textContent = biz.name;
             document.getElementById('cat-biz-tagline').textContent = biz.tagline || '';
             if (biz.logo_url) {
@@ -322,10 +264,6 @@
                 headerWa.href = `https://wa.me/${biz.whatsapp}?text=${encodeURIComponent('Hola, me interesa obtener información de sus productos')}`;
             }
 
-            // Apply Layout Customizations
-            const layoutWrapper = document.getElementById('catalog-layout-wrapper');
-            layoutWrapper.className = `layout-${catalogConfig.layout_style || 'grid'}`;
-
             const grid = document.getElementById('products-grid');
             grid.className = `products-grid cols-${catalogConfig.columns || 3}`;
 
@@ -333,7 +271,6 @@
                 document.documentElement.style.setProperty('--btn-color', catalogConfig.button_color);
             }
 
-            // Search Filter
             const searchInput = document.getElementById('catalog-search-input');
             if (catalogConfig.show_search !== false) {
                 searchInput.style.display = 'block';
