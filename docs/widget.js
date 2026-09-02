@@ -46,11 +46,39 @@
         }
     }
 
-    if (!customElements.get('wisbe_landingpage')) {
-        customElements.define('wisbe_landingpage', WisbeLandingPage);
+    // Safely register custom elements
+    function registerTag(tagName, elementClass) {
+        try {
+            if (!customElements.get(tagName)) {
+                customElements.define(tagName, elementClass);
+            }
+        } catch (e) {
+            // Fallback for non-hyphenated custom tags in custom element registry
+        }
     }
 
-    if (!customElements.get('wisbe_catalogo')) {
-        customElements.define('wisbe_catalogo', WisbeCatalogo);
-    }
+    registerTag('wisbe-landingpage', WisbeLandingPage);
+    registerTag('wisbe-catalogo', WisbeCatalogo);
+    registerTag('wisbe-landing-page', WisbeLandingPage);
+
+    // Dynamic selector fallback for wisbe_landingPage & wisbe_catalogo tags
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('wisbe_landingPage, wisbe_catalogo').forEach(el => {
+            const clientId = el.getAttribute('client-id');
+            if (!clientId) return;
+
+            const isLanding = el.tagName.toLowerCase().includes('landing');
+            const iframe = document.createElement('iframe');
+            iframe.src = isLanding
+                ? `${BASE_URL}/public_landing.html?id=${clientId}`
+                : `${BASE_URL}/public_catalog.html?id=${clientId}`;
+            iframe.style.width = '100%';
+            iframe.style.height = el.getAttribute('height') || (isLanding ? '800px' : '700px');
+            iframe.style.border = 'none';
+            iframe.style.borderRadius = '8px';
+
+            el.innerHTML = '';
+            el.appendChild(iframe);
+        });
+    });
 })();
